@@ -1,0 +1,5460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品牌 Talk</title>
+<style>
+
+/* ===== 设计变量（浅色 / 暗色） ===== */
+:root{
+  --bg:#fafafa; --card:#ffffff; --border:#ececf0; --text:#1f2329; --muted:#8a8f98;
+  --primary:#e5484d; --primary-2:#d64045; --primary-bg:#fdecec;
+  --radius-card:8px; --radius-btn:6px;
+  --shadow:0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover:0 8px 24px rgba(0,0,0,.10);
+  --hover:#f4f4f6;
+}
+html[data-theme="dark"]{
+  --bg:#151619; --card:#1e2025; --border:#2c2f36; --text:#e8eaed; --muted:#989da6;
+  --hover:#262932; --primary-bg:#3a2325;
+  --shadow-hover:0 8px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.app{min-width:1024px}
+button{font-family:inherit}
+.hidden{display:none!important}
+
+/* ===== 顶部栏 56px ===== */
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.logo{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.logo .brand{color:var(--primary)}
+.top-right{display:flex;align-items:center;gap:6px}
+.hbtn{background:transparent;border:1px solid transparent;color:var(--text);font-size:13px;cursor:pointer;padding:6px 10px;border-radius:var(--radius-btn);display:flex;align-items:center;gap:5px}
+.hbtn:hover{background:var(--hover)}
+.lang-sel{border:1px solid var(--border);border-radius:var(--radius-btn);padding:5px 8px;font-size:13px;background:var(--card);color:var(--text);outline:none;cursor:pointer}
+.dropdown{position:relative}
+.menu{position:absolute;right:0;top:36px;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-hover);min-width:140px;padding:4px;z-index:30}
+.menu-item{padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)}
+.menu-item:hover{background:var(--hover)}
+
+/* ===== 两栏布局：240px 导航 + 弹性主区 ===== */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.nav{width:240px;flex:none;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:56px;height:calc(100vh - 56px)}
+.nav-pad{padding:12px 12px 4px}
+.btn-new{width:100%;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-btn);padding:9px 0;font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:10px}
+.btn-new:hover{background:var(--primary-2)}
+.nav-search{position:relative;margin-bottom:10px}
+.nav-search .icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.7;pointer-events:none}
+.nav-search input{width:100%;border:1px solid var(--border);border-radius:var(--radius-btn);padding:7px 8px 7px 28px;font-size:13px;background:var(--bg);color:var(--text);outline:none}
+.nav-search input:focus{border-color:var(--primary)}
+.nav-label{font-size:12px;font-weight:700;color:var(--muted);padding:4px 6px}
+.history{flex:1;overflow:auto;padding:2px 8px 8px}
+.h-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer}
+.h-item:hover{background:var(--hover)}
+.h-item.active{background:var(--primary-bg)}
+.h-emoji{width:28px;height:28px;border-radius:6px;background:var(--hover);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.h-title{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-date{font-size:11px;color:var(--muted);flex:none}
+.h-empty{font-size:12.5px;color:var(--muted);padding:8px;line-height:1.5}
+.nav-foot{margin-top:auto;border-top:1px solid var(--border);padding:8px 12px}
+.btn-settings{width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;color:var(--text);font-size:13px;cursor:pointer;padding:8px;border-radius:var(--radius-btn)}
+.btn-settings:hover{background:var(--hover)}
+
+/* ===== 主内容 ===== */
+.main{flex:1;min-width:0;padding:20px 26px}
+.block{margin-bottom:30px}
+.block-title{font-size:15px;font-weight:800;margin-bottom:12px}
+
+/* 区块 1：自动圆桌 */
+.big-input-wrap{position:relative}
+.big-input{width:100%;min-height:76px;border:1px solid var(--border);border-radius:var(--radius-card);padding:12px 14px;font-size:14px;resize:vertical;background:var(--card);color:var(--text);outline:none;transition:border-color .15s, box-shadow .15s}
+.big-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(229,72,77,.08)}
+.start-btn{position:absolute;right:10px;bottom:10px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-btn);padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.start-btn:hover{background:var(--primary-2)}
+.toolbar{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.toolbar label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.toolbar select{font-size:12.5px;border:1px solid var(--border);border-radius:var(--radius-btn);padding:5px 8px;background:var(--card);color:var(--text);outline:none}
+.toolbar-sep{width:1px;height:18px;background:var(--border)}
+.preview-label{font-size:12px;color:var(--muted);font-weight:600}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:6px 12px;border-radius:var(--radius-btn);font-size:12.5px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn.small{padding:5px 10px;font-size:12px}
+.btn.danger{color:var(--primary);border-color:#f3c2c4}
+.btn.danger:hover{background:var(--primary-bg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--hover);border:1px solid var(--border);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.chip .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.chip.host{background:var(--primary-bg);border-color:#f3c2c4;color:var(--primary)}
+.chip .host-tag{font-size:10.5px;font-weight:700}
+.hint-bar{margin-top:12px;font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px}
+
+/* 区块 2：推荐圆桌 */
+.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rec-card{border:1px solid var(--border);border-radius:var(--radius-card);padding:14px;background:var(--card);cursor:pointer;transition:box-shadow .15s, border-color .15s}
+.rec-card:hover{box-shadow:var(--shadow-hover);border-color:#e8d7d8}
+.rec-emoji{font-size:24px;margin-bottom:10px}
+.rec-title{font-size:14px;font-weight:700}
+.rec-desc{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.55}
+
+/* 区块 3：与品牌对话 */
+.brand-search-row{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.brand-search-row .nav-search{flex:1;margin:0}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tag{padding:4px 13px;border-radius:999px;font-size:12.5px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:.15s}
+.tag:hover{border-color:var(--primary);color:var(--primary)}
+.tag.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.brand-card{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--card);display:flex;flex-direction:column;transition:box-shadow .15s, border-color .15s;padding:12px}
+.brand-card:hover{box-shadow:var(--shadow-hover)}
+.bc-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.bc-logo{width:36px;height:36px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex:none}
+.bc-star{margin-left:auto;border:none;background:none;font-size:17px;cursor:pointer;color:#c9cdd4;line-height:1;padding:2px}
+.bc-star.fav{color:#f5b301}
+.bc-name{font-size:14px;font-weight:700}
+.bc-cat{display:inline-block;margin-top:3px;padding:2px 10px;border-radius:999px;background:var(--hover);color:var(--muted);font-size:11px}
+.bc-btn{margin-top:12px;width:100%;padding:7px 0;border:1px solid var(--border);border-radius:var(--radius-btn);background:transparent;color:var(--text);font-size:12.5px;cursor:pointer;transition:.15s}
+ .bc-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg)}
+.bc-actions{display:flex;gap:8px;margin-top:8px}
+.bc-actions button{flex:1;padding:4px 0;font-size:11.5px;border:1px solid var(--border);border-radius:var(--radius-btn);background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+.bc-actions button:hover{color:var(--primary);border-color:var(--primary)}
+.bc-add{margin-left:6px;width:22px;height:22px;flex:none;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:.15s}
+.bc-add:hover{border-color:var(--primary);color:var(--primary)}
+.bc-add.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.brand-card.selected{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.pick-bar{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 12px;border:1px solid var(--primary);border-radius:var(--radius-card);background:var(--primary-bg)}
+.pick-label{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.pick-label b{color:var(--primary)}
+.pick-bar .chips{flex:1;min-width:0}
+.chip-x{margin-left:2px;cursor:pointer;font-weight:700;color:var(--muted)}
+.h-more{border:none;background:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px 5px;border-radius:5px;flex:none;visibility:hidden}
+.h-item:hover .h-more{visibility:visible}
+.h-more:hover{background:var(--primary-bg);color:var(--primary)}
+.h-pin{font-size:11px;flex:none}
+.h-item.in-folder{padding-left:22px}
+.h-folder{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.h-folder:hover{background:var(--hover)}
+.h-folder .f-count{margin-left:auto;font-size:11px;font-weight:500}
+.menu.pop{position:fixed;z-index:80}
+.menu-item.danger{color:var(--primary)}
+
+/* ===== 对话视图 ===== */
+.stage-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.pick-head-title{font-size:14.5px;font-weight:800}
+.stage-head .status{margin-top:0}
+.status{padding:8px 14px;border-radius:8px;background:var(--primary-bg);color:var(--primary);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.status.err{background:#fdecec;color:#b91c1c}
+.status.ok{background:#ecfdf5;color:#047857}
+.spinner{width:14px;height:14px;border:2px solid #f3c2c4;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stage{min-height:200px}
+
+/* ===== 聊天气泡 ===== */
+.section-title{display:flex;align-items:center;gap:10px;margin:22px 0 12px;font-size:14.5px;font-weight:700}
+.section-title .bar{width:4px;height:16px;border-radius:2px;background:var(--primary)}
+.case-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:14px 16px;box-shadow:var(--shadow);margin-bottom:4px}
+.case-card .case-title{font-weight:700;font-size:14.5px;margin-bottom:3px}
+.case-card .case-meta{font-size:12px;color:var(--muted)}
+.bubble-row{display:flex;gap:10px;margin:10px 0;align-items:flex-start;opacity:0;transform:translateY(8px);animation:rise .3s forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.avatar{width:36px;height:36px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.bubble-body{max-width:78%}
+.bubble-head{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;flex-wrap:wrap}
+.bubble-name{font-size:13.5px;font-weight:700}
+.bubble-cat{font-size:11px;color:var(--muted)}
+.bubble{background:var(--card);border:1px solid var(--border);border-radius:4px 12px 12px 12px;padding:11px 14px;font-size:13.5px;box-shadow:var(--shadow)}
+.bubble .tagline{display:block;margin-top:7px;padding-top:7px;border-top:1px dashed var(--border);color:var(--primary);font-weight:600;font-style:italic}
+.angle-chip{display:inline-block;font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 9px;margin-bottom:5px}
+.host-row{justify-content:center}
+.host-card{max-width:86%;background:var(--primary-bg);border:1px solid #f3c2c4;border-radius:12px;padding:13px 16px;font-size:14px;text-align:center;box-shadow:var(--shadow)}
+.host-card .host-label{font-size:11px;font-weight:700;color:var(--primary);letter-spacing:2px;margin-bottom:4px}
+.target-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;background:var(--hover);border:1px solid var(--border);border-radius:999px;padding:2px 9px;margin:4px 8px 5px 0}
+.stance{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;margin:4px 0 5px}
+.stance.agree{color:#047857;background:#ecfdf5;border:1px solid #a7f3d0}
+.stance.disagree{color:#b91c1c;background:#fdecec;border:1px solid #fecaca}
+.stance.build-on{color:var(--primary);background:var(--primary-bg);border:1px solid #f3c2c4}
+
+/* ===== 灵感卡 ===== */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.inspire-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:16px;box-shadow:var(--shadow);border-top:4px solid var(--bc,var(--primary))}
+.inspire-card .card-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px}
+.inspire-card .card-cat{font-size:11px;color:var(--muted);font-weight:500;margin-left:auto}
+.inspire-card ul.headline{margin:12px 0 10px;list-style:none}
+.inspire-card ul.headline li{font-size:13.5px;font-weight:600;color:var(--primary-2);margin:6px 0;border-left:3px solid var(--bc,var(--primary));padding-left:8px}
+.inspire-card .why{font-size:12px;color:var(--muted);line-height:1.7}
+
+/* ===== 主持人总结 ===== */
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-card);padding:18px;box-shadow:var(--shadow);margin-top:14px}
+.summary-intro{font-size:14.5px;text-align:center;margin-bottom:6px}
+.sum-block{margin-top:16px}
+.sum-title{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:9px}
+table.mini{width:100%;border-collapse:collapse;font-size:13px}
+table.mini th,table.mini td{border:1px solid var(--border);padding:7px 10px;text-align:left}
+table.mini th{background:var(--hover);font-weight:600}
+ul.sum{list-style:none;display:flex;flex-direction:column;gap:8px}
+ul.sum li{padding-left:20px;position:relative;font-size:13.5px}
+ul.sum li::before{content:"✓";position:absolute;left:0;color:#10b981;font-weight:700}
+ul.sum.diff li::before{content:"⚡";color:#f59e0b}
+.action-item{display:flex;gap:10px;align-items:flex-start;background:var(--hover);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13.5px;margin-bottom:8px}
+.action-item .num{flex:none;width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ===== 附件 ===== */
+.attach-list{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.attach-item{display:flex;align-items:center;gap:8px;background:var(--hover);border:1px solid var(--border);border-radius:8px;padding:5px 11px;font-size:12.5px}
+.attach-item .a-name{font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attach-item .a-meta{color:var(--muted);font-size:11px;flex:none}
+.attach-item .a-del{margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:5px}
+.attach-item .a-del:hover{color:var(--primary);background:var(--primary-bg)}
+
+/* ===== 弹窗 / 提示 ===== */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal{background:var(--card);border-radius:10px;width:100%;max-width:460px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:85vh;overflow:auto}
+.modal h3{margin-bottom:12px;font-size:16px}
+.modal label{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin:12px 0 5px}
+.modal .inp{width:100%;font-family:inherit;font-size:13.5px;border:1px solid var(--border);border-radius:var(--radius-btn);padding:8px 10px;background:var(--bg);color:var(--text);outline:none}
+.modal .inp:focus{border-color:var(--primary)}
+.modal .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+.modal p{font-size:13px;line-height:1.7}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:9px 16px;border-radius:8px;font-size:12.5px;z-index:99;box-shadow:0 8px 30px rgba(0,0,0,.3);opacity:0;transition:.25s;pointer-events:none;max-width:86vw}
+.toast.show{opacity:1}
+.foot{border-top:1px solid var(--border);margin-top:8px;padding:14px 0;text-align:center;color:var(--muted);font-size:11.5px}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶部栏 56px -->
+  <header class="topbar">
+    <div class="logo">🪑 <span class="brand">品牌 Talk</span></div>
+    <div class="top-right">
+      <select id="langSelect" class="lang-sel" title="输出语言">
+        <option value="中文">中文</option>
+        <option value="English">English</option>
+        <option value="双语">双语</option>
+      </select>
+      <button id="darkToggle" class="hbtn" title="切换暗色模式">🌙</button>
+      <div class="dropdown" id="moreWrap">
+        <button id="moreBtn" class="hbtn">更多 ▾</button>
+        <div id="moreMenu" class="menu hidden">
+          <div class="menu-item" data-act="usage">使用说明</div>
+          <div class="menu-item" data-act="clear">清空历史</div>
+        </div>
+      </div>
+      <button id="supportBtn" class="hbtn">支持</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- 左侧导航 240px -->
+    <aside class="nav">
+      <div class="nav-pad">
+        <button id="btnNewChat" class="btn-new">＋ 新对话</button>
+        <div class="nav-search">
+          <span class="icon">🔍</span>
+          <input id="navSearch" type="text" placeholder="搜索对话">
+        </div>
+        <div class="nav-label">对话历史</div>
+      </div>
+      <div id="historyList" class="history"></div>
+      <div class="nav-foot">
+        <button id="btnSettings" class="btn-settings">⚙️ 设置</button>
+      </div>
+    </aside>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+      <!-- 首页：三个区块 -->
+      <div id="homeView">
+
+        <!-- 区块 1：自动圆桌 -->
+        <section id="inputPanel" class="block">
+          <div class="block-title">自动圆桌</div>
+          <div class="big-input-wrap">
+            <textarea id="productInput" class="big-input" rows="3" placeholder="输入话题，AI 自动匹配嘉宾..."></textarea>
+            <button id="btnRoundtable" class="start-btn">开始 →</button>
+          </div>
+          <div class="toolbar">
+            <label>行业
+              <select id="industrySelect"></select>
+            </label>
+            <label>市场
+              <select id="marketSelect">
+                <option value="全球">全球</option>
+                <option value="中国">中国</option>
+                <option value="欧美">欧美</option>
+                <option value="日韩">日韩</option>
+              </select>
+            </label>
+            <span class="toolbar-sep"></span>
+            <span class="preview-label">阵容</span>
+            <div id="brandPreview" class="chips"></div>
+            <button id="btnShuffle" class="btn small" title="随机换一组品牌">🔄 换一换</button>
+            <button id="btnCards" class="btn small">💡 只要灵感卡</button>
+            <label class="btn small" for="fileInput">📎 资料</label>
+            <input id="fileInput" type="file" multiple accept=".txt,.md,.markdown,.csv,.tsv,.json,.log,.text" class="hidden">
+          </div>
+          <div id="attachList" class="attach-list"></div>
+          <div id="keyHint" class="hint-bar hidden">🔑 未检测到 API Key：将自动使用内置演示数据。点击左下角「⚙️ 设置」填入 Key 即可调用真实模型。</div>
+        </section>
+
+        <!-- 区块 2：推荐圆桌 -->
+        <section class="block">
+          <div class="block-title">推荐圆桌</div>
+          <div id="recGrid" class="rec-grid"></div>
+        </section>
+
+        <!-- 区块 3：与品牌对话 -->
+        <section class="block">
+          <div class="block-title">与品牌对话</div>
+          <div class="brand-search-row">
+            <div class="nav-search">
+              <span class="icon">🔍</span>
+              <input id="brandSearch" type="text" placeholder="搜索或输入任意品牌...">
+            </div>
+            <button id="createRoleBtn" class="btn">＋ 创建角色</button>
+          </div>
+          <div id="brandTags" class="tags"></div>
+          <div id="pickBar" class="pick-bar hidden">
+            <span class="pick-label">已选 <b id="pickCount">0</b>/4</span>
+            <div id="pickChips" class="chips"></div>
+            <button id="pickClear" class="btn small">清空</button>
+            <button id="pickStart" class="btn small primary">开始圆桌 →</button>
+          </div>
+          <div id="brandGrid" class="brand-grid"></div>
+        </section>
+
+      </div>
+
+      <!-- 选人圆桌：二级页面（先填话题再开始） -->
+      <div id="pickView" class="hidden">
+        <div class="stage-head">
+          <button id="btnPickBack" class="btn small">← 返回</button>
+          <div class="pick-head-title">已选阵容 · 开始圆桌</div>
+        </div>
+        <div class="block">
+          <div class="block-title">阵容（嘉宾 + 主持人）</div>
+          <div id="pickLineup" class="chips" style="margin-bottom:6px"></div>
+          <div class="block-title">输入话题</div>
+          <div class="big-input-wrap">
+            <textarea id="pickInput" class="big-input" rows="3" placeholder="输入话题，例如：一款 3 秒出汁的便携榨汁杯，怎么让年轻人天天带着它出门？"></textarea>
+            <button id="btnPickStart" class="start-btn">开始讨论 →</button>
+          </div>
+          <div class="toolbar">
+            <label>市场
+              <select id="pickMarket">
+                <option value="全球">全球</option>
+                <option value="中国">中国</option>
+                <option value="欧美">欧美</option>
+                <option value="日韩">日韩</option>
+              </select>
+            </label>
+            <span class="toolbar-sep"></span>
+            <span class="preview-label">主持人</span>
+            <div id="pickHost" class="chips"></div>
+          </div>
+          <div id="pickKeyHint" class="hint-bar hidden">🔑 未配置 API Key：将使用内置演示数据演示；配置 Key 后按你选的品牌讨论。</div>
+        </div>
+      </div>
+
+      <!-- 对话视图 -->
+      <div id="stageView" class="hidden">
+        <div class="stage-head">
+          <button id="btnBackHome" class="btn small">← 返回</button>
+          <div id="statusBar" class="status hidden"></div>
+          <button id="btnStop" class="btn danger small hidden">停止</button>
+        </div>
+        <div id="stage" class="stage"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="foot">仅供创意灵感与学习，与各品牌无关；不生成冒充品牌官方传播的内容。数据来源：HuggingFace manifesta/brandvoice-marketing-briefs (CC0)。</footer>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const BRAND_VOICES = [
+  {
+    "brand": "Adaption",
+    "category": "AI",
+    "voice": {
+      "tone": "visionary and assertive",
+      "personality": [
+        "efficient",
+        "visionary",
+        "collaborative",
+        "human-centric",
+        "innovative",
+        "bold"
+      ],
+      "voice_summary": "The brand voice is characterized by a bold declaration of the end of monolithic AI and the beginning of a new era of adaptive intelligence."
+    },
+    "channels": [
+      "blog teaser",
+      "ad",
+      "onboarding step",
+      "feature announcement",
+      "product description",
+      "landing hero",
+      "sales deck",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "conference abstract",
+      "homepage hero",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "careers page",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "print ad",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "social post",
+      "a community post",
+      "changelog",
+      "an ad",
+      "webinar invite",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Airbnb",
+    "category": "Consumer",
+    "voice": {
+      "tone": "inviting and exploratory",
+      "personality": [
+        "exploratory",
+        "inviting",
+        "adventurous",
+        "community-driven",
+        "inclusive"
+      ],
+      "voice_summary": "Airbnb connects people to iconic spaces, places, and experiences."
+    },
+    "channels": [
+      "landing page hero",
+      "a landing page hero",
+      "landing page section",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "ad",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "seasonal social post",
+      "email campaign",
+      "a feature announcement",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "social post",
+      "changelog",
+      "comparison page",
+      "an Instagram caption",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Airtable",
+    "category": "SaaS",
+    "voice": {
+      "tone": "confident and empowering",
+      "personality": [
+        "collaborative",
+        "sophisticated",
+        "innovative",
+        "results-driven"
+      ],
+      "voice_summary": "Airtable empowers teams to build AI-powered workflows, unifying data and maximizing collaboration for long-term success"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "conference abstract",
+      "a LinkedIn post",
+      "a short blog intro",
+      "FAQ answer",
+      "a product description",
+      "a changelog entry",
+      "error message microcopy",
+      "LinkedIn",
+      "product announcement",
+      "a feature announcement",
+      "case study",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "webinar invite",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Allbirds",
+    "category": "Consumer",
+    "voice": {
+      "tone": "effortless and easy",
+      "personality": [
+        "comfortable",
+        "versatile",
+        "sustainable",
+        "natural"
+      ],
+      "voice_summary": "Allbirds' voice is wildly comfortable and breathable, just like their shoes."
+    },
+    "channels": [
+      "feature announcement",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "FAQ",
+      "Instagram",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "a product description",
+      "release notes",
+      "social caption",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 32
+  },
+  {
+    "brand": "Anthropic",
+    "category": "AI",
+    "voice": {
+      "tone": "informative and professional",
+      "personality": [
+        "innovative",
+        "scientific",
+        "responsible",
+        "collaborative",
+        "approachable"
+      ],
+      "voice_summary": "Anthropic is dedicated to building AI systems that people can rely on, prioritizing safety and responsibility in their development and deployment."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "onboarding step",
+      "developer email",
+      "product description",
+      "partnership announcement",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "FAQ answer",
+      "a push notification",
+      "careers page",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "newsletter",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "social post",
+      "changelog",
+      "comparison page",
+      "conference abstract",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Asana",
+    "category": "SaaS",
+    "voice": {
+      "tone": "confident and helpful",
+      "personality": [
+        "helpful",
+        "empowering",
+        "confident",
+        "collaborative",
+        "professional",
+        "innovative"
+      ],
+      "voice_summary": "Asana's voice is professional and innovative, empowering teams to work efficiently with AI teammates"
+    },
+    "channels": [
+      "a landing page hero",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "a short blog intro",
+      "a blog intro",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "product announcement",
+      "an onboarding step",
+      "a feature announcement",
+      "in-app message",
+      "case study",
+      "email",
+      "a community post",
+      "an ad",
+      "an email",
+      "X post"
+    ],
+    "examples": [
+      "Heads up, a key milestone is trending late. Asana flagged the blocker early so your team can adjust now. Tap to see what needs attention."
+    ],
+    "total_samples": 35
+  },
+  {
+    "brand": "Atlassian",
+    "category": "B2B",
+    "voice": {
+      "tone": "confident and supportive",
+      "personality": [
+        "reliable",
+        "secure",
+        "supportive",
+        "results-driven",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Atlassian's voice is about empowering teams to work together seamlessly with AI-powered tools."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "in-product banner",
+      "a feature announcement",
+      "community post",
+      "email",
+      "event banner",
+      "a community post",
+      "social post",
+      "changelog",
+      "landing page",
+      "an ad",
+      "comparison page",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Brex",
+    "category": "Fintech",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "forward-thinking",
+        "efficient",
+        "global",
+        "intelligent",
+        "innovative"
+      ],
+      "voice_summary": "Brex offers a comprehensive financial platform that combines speed and control for modern businesses"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "product description",
+      "in-app banner",
+      "faq",
+      "twitter",
+      "landing hero",
+      "blog intro",
+      "linkedin post",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "LinkedIn post",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "error message microcopy",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "social post",
+      "an ad",
+      "changelog",
+      "a community post",
+      "launch post",
+      "comparison page",
+      "onboarding email"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Calendly",
+    "category": "SaaS",
+    "voice": {
+      "tone": "helpful and informative",
+      "personality": [
+        "efficient",
+        "professional",
+        "innovative",
+        "user-friendly"
+      ],
+      "voice_summary": "Calendly simplifies meeting scheduling with easy-to-use automation and integration tools"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "ad",
+      "product description",
+      "blog intro",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "in-product prompt",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "onboarding email",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Canva",
+    "category": "Consumer",
+    "voice": {
+      "tone": "supportive and encouraging",
+      "personality": [
+        "helpful",
+        "friendly",
+        "creative",
+        "approachable"
+      ],
+      "voice_summary": "Canva's voice is friendly and approachable, making design and editing tools accessible to everyone"
+    },
+    "channels": [
+      "a landing page hero",
+      "a comparison-page intro",
+      "a feature tip",
+      "a nonprofit-outreach email",
+      "a presentation-feature tip",
+      "testimonial framing",
+      "an X post",
+      "a feature spotlight",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "a holiday-template promo",
+      "a push notification",
+      "a feature blurb",
+      "an onboarding tip",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "error message microcopy",
+      "a landing hero",
+      "a comparison page intro",
+      "a video-feature blurb",
+      "an onboarding step",
+      "a feature announcement",
+      "a community post",
+      "an ad",
+      "a back-to-school promo",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Cards Against Humanity",
+    "category": "Consumer",
+    "voice": {
+      "tone": "dark humor",
+      "personality": [
+        "sarcastic",
+        "dark",
+        "playful",
+        "irreverent"
+      ],
+      "voice_summary": "Cards Against Humanity's voice is unapologetically irreverent and humorous, embracing its own absurdity and stupidity."
+    },
+    "channels": [
+      "landing page hero",
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "an email body",
+      "a push notification",
+      "product page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "error message microcopy",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "social post",
+      "a community post",
+      "comparison page",
+      "an Instagram caption",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Carta",
+    "category": "Fintech",
+    "voice": {
+      "tone": "confident and informative",
+      "personality": [
+        "strategic",
+        "connected",
+        "professional",
+        "innovative"
+      ],
+      "voice_summary": "Carta's voice is professional and innovative, connecting private capital with cutting-edge technology"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a short blog intro",
+      "FAQ answer",
+      "product page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "social post",
+      "webinar invite",
+      "comparison page"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "ClickUp",
+    "category": "SaaS",
+    "voice": {
+      "tone": "Empowering and optimistic",
+      "personality": [
+        "solution-focused",
+        "optimistic",
+        "confident",
+        "innovative",
+        "energetic"
+      ],
+      "voice_summary": "ClickUp's voice is energetic and innovative, promising to revolutionize work with AI-powered solutions"
+    },
+    "channels": [
+      "onboarding nudge",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "in-app banner",
+      "twitter",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "homepage hero",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "LinkedIn post",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "launch announcement",
+      "a changelog entry",
+      "email campaign",
+      "sales deck slide",
+      "email",
+      "social post",
+      "an ad",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "an Instagram caption"
+    ],
+    "examples": [],
+    "total_samples": 32
+  },
+  {
+    "brand": "Cloudflare",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "direct and helpful",
+      "personality": [
+        "approachable",
+        "technical",
+        "helpful",
+        "confident",
+        "direct",
+        "innovative"
+      ],
+      "voice_summary": "Cloudflare's voice is built on empowering developers to build without boundaries on a global network"
+    },
+    "channels": [
+      "a landing page hero",
+      "blog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a blog intro",
+      "a push notification",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "LinkedIn",
+      "product announcement",
+      "an onboarding step",
+      "case study",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "X post"
+    ],
+    "examples": [
+      "We just blocked a large attack on your site before it reached your origin. Secure by default did its job. Tap to see the details."
+    ],
+    "total_samples": 34
+  },
+  {
+    "brand": "Cohere",
+    "category": "AI",
+    "voice": {
+      "tone": "confident and informative",
+      "personality": [
+        "forward-thinking",
+        "professional",
+        "expert",
+        "innovative"
+      ],
+      "voice_summary": "Cohere empowers businesses to own their AI and advance progress across industries with secure, flexible, and independent solutions"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "docs",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "product announcement",
+      "a feature announcement",
+      "case study",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "conference abstract",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Coinbase",
+    "category": "Fintech",
+    "voice": {
+      "tone": "confident and helpful",
+      "personality": [
+        "transparent",
+        "secure",
+        "helpful",
+        "confident",
+        "trustworthy",
+        "user-centric",
+        "innovative"
+      ],
+      "voice_summary": "Empowering users to take control of their cryptocurrency investments with simplicity and security"
+    },
+    "channels": [
+      "a landing page hero",
+      "push notification",
+      "blog",
+      "a changelog",
+      "an X post",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a short blog intro",
+      "a blog intro",
+      "a push notification",
+      "a product description",
+      "an FAQ answer",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "in-app message",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "X post"
+    ],
+    "examples": [
+      "Your staking rewards just landed in your account. Your crypto is working for you, transparently, every day. Tap to see what you earned."
+    ],
+    "total_samples": 34
+  },
+  {
+    "brand": "Databricks",
+    "category": "AI",
+    "voice": {
+      "tone": "informative and helpful",
+      "personality": [
+        "empowering",
+        "intelligent",
+        "innovative"
+      ],
+      "voice_summary": "Databricks empowers innovators to build and run apps, agents, and AI on their data"
+    },
+    "channels": [
+      "event signage",
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "twitter",
+      "landing hero",
+      "case study intro",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "homepage hero",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "website section",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "sales deck slide",
+      "a feature announcement",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "launch post",
+      "comparison page",
+      "webinar invite",
+      "onboarding email",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Datadog",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "expert guidance",
+      "personality": [
+        "helpful",
+        "informative",
+        "professional",
+        "technical"
+      ],
+      "voice_summary": "Datadog's voice is technical and informative, guiding users through complex cloud monitoring and security solutions."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "a short blog intro",
+      "LinkedIn post",
+      "FAQ answer",
+      "careers page",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "a feature announcement",
+      "sales one-pager",
+      "product email",
+      "email",
+      "community post",
+      "event banner",
+      "an ad",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 29
+  },
+  {
+    "brand": "Discord",
+    "category": "Gaming",
+    "voice": {
+      "tone": "friendly and approachable",
+      "personality": [
+        "relaxed",
+        "youthful",
+        "inclusive",
+        "fun"
+      ],
+      "voice_summary": "Discord's voice is casual and inviting, making online gaming and socializing feel like hanging out with friends"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "push notification",
+      "product description",
+      "in-app banner",
+      "app store description",
+      "faq",
+      "blog intro",
+      "an X post",
+      "announcement post",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "campaign headline",
+      "a push notification",
+      "video script",
+      "onboarding tooltip",
+      "release notes",
+      "twitch panel",
+      "a changelog entry",
+      "error message microcopy",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Docker",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "assuring and professional",
+      "personality": [
+        "secure",
+        "efficient",
+        "confident",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Docker's voice is built on a foundation of trust, security, and collaboration, empowering developers to build and deliver containerized applications with ease and confidence."
+    },
+    "channels": [
+      "a landing page hero",
+      "a comparison-page intro",
+      "a year-end recap post",
+      "a meetup talk abstract",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a landing-page hero",
+      "a short blog intro",
+      "an email body",
+      "a support-doc callout",
+      "a short banner ad",
+      "an X thread opener",
+      "a developer-newsletter blurb",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "a renewal-reminder email",
+      "a landing hero",
+      "an onboarding step",
+      "a feature announcement",
+      "a community post",
+      "an ad",
+      "an email"
+    ],
+    "examples": [],
+    "total_samples": 31
+  },
+  {
+    "brand": "Dropbox",
+    "category": "SaaS",
+    "voice": {
+      "tone": "helpful and productive",
+      "personality": [
+        "reliable",
+        "secure",
+        "efficient",
+        "helpful",
+        "collaborative",
+        "professional"
+      ],
+      "voice_summary": "Empowering users to work efficiently and securely with less hassle"
+    },
+    "channels": [
+      "a landing page hero",
+      "push notification",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a short blog intro",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Duolingo",
+    "category": "Consumer",
+    "voice": {
+      "tone": "inviting and encouraging",
+      "personality": [
+        "friendly",
+        "motivating",
+        "playful",
+        "approachable"
+      ],
+      "voice_summary": "Duolingo's voice is a perfect blend of fun and science, making language learning an enjoyable experience."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "ad",
+      "product description",
+      "app store description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "social caption",
+      "a changelog entry",
+      "error message microcopy",
+      "in-app message",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "ElevenLabs",
+    "category": "AI",
+    "voice": {
+      "tone": "informative and helpful",
+      "personality": [
+        "advanced",
+        "innovative",
+        "helpful",
+        "technological",
+        "professional"
+      ],
+      "voice_summary": "Empowering creators and enterprises with seamless technology interaction"
+    },
+    "channels": [
+      "a landing page hero",
+      "an app-store description",
+      "a newsletter feature",
+      "an X post",
+      "a LinkedIn post",
+      "a developer-docs intro",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "a music-feature announcement",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "an enterprise case-study teaser",
+      "error message microcopy",
+      "a comparison page intro",
+      "an onboarding step",
+      "a feature announcement",
+      "a holiday-campaign concept",
+      "a product-page section",
+      "a community post",
+      "an ad",
+      "a webinar invite",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Epic Games",
+    "category": "Gaming",
+    "voice": {
+      "tone": "to the point",
+      "personality": [
+        "informative",
+        "direct",
+        "neutral"
+      ],
+      "voice_summary": "Epic Games presents a straightforward and informative tone"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "ad",
+      "product description",
+      "category page",
+      "landing hero",
+      "blog intro",
+      "consent banner",
+      "account settings",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "store homepage",
+      "product page",
+      "a product description",
+      "release notes",
+      "newsletter",
+      "onboarding screen",
+      "store banner",
+      "a feature announcement",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "comparison page",
+      "an Instagram caption",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Figma",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "helpful and inspiring",
+      "personality": [
+        "helpful",
+        "inspiring",
+        "collaborative",
+        "user-centric",
+        "innovative"
+      ],
+      "voice_summary": "Figma empowers teams to turn big ideas into real products through collaborative design and development tools"
+    },
+    "channels": [
+      "a landing page hero",
+      "blog",
+      "X post",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a short blog intro",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "product announcement",
+      "a feature announcement",
+      "case study",
+      "in-app message",
+      "a community post",
+      "an ad",
+      "website",
+      "conference abstract",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "General",
+    "category": "General",
+    "voice": {
+      "tone": "clear and helpful",
+      "personality": [],
+      "voice_summary": "General instruction"
+    },
+    "channels": [
+      "coding",
+      "reasoning",
+      "explanation",
+      "practical",
+      "structured",
+      "writing",
+      "knowledge"
+    ],
+    "examples": [
+      "The rear parking lot will be closed for repaving next Monday and Tuesday.",
+      "Their closing speed is 60 plus 90, which is 150 km per hour. They meet after 300 over 150, which equals 2 hours.",
+      "The chimes are 1, 2, 3, 4, 5, 6, which is the sum 1 through 6. That adds to 21 chimes in total.",
+      "That movie was genuinely excellent, and I mean that sincerely.",
+      "Each share is 90 divided by 5, which equals 18 dollars per person.",
+      "One hour 15 minutes is 1.25 hours. Speed is distance over time, which is 90 divided by 1.25. That equals 72 km per hour.",
+      "Done hours are 0.25 times 40, which is 10. Remaining hours are 40 minus 10, which equals 30 hours.",
+      "After three years of work, our new community library opened its doors this morning. Come on in."
+    ],
+    "total_samples": 2647
+  },
+  {
+    "brand": "GitHub",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "helpful and informative",
+      "personality": [
+        "collaborative",
+        "supportive",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "GitHub's voice is collaborative and developer-focused, emphasizing the power of working together to build and shape the future of technology"
+    },
+    "channels": [
+      "a landing page hero",
+      "an open-source spotlight intro",
+      "an enterprise-migration blurb",
+      "an X post",
+      "a feature spotlight",
+      "a LinkedIn post",
+      "a short blog intro",
+      "a changelog highlight",
+      "a push notification",
+      "a feature blurb",
+      "a year-in-review post",
+      "a webinar promo",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "a landing hero",
+      "a comparison page intro",
+      "a docs-page intro",
+      "an onboarding step",
+      "a feature announcement",
+      "a student-developer-pack promo",
+      "a community post",
+      "an ad",
+      "an enterprise security blurb",
+      "an Instagram caption",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "GitLab",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "confidently helpful",
+      "personality": [
+        "confidently helpful",
+        "secure",
+        "efficient",
+        "informative",
+        "confident",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "GitLab's voice is built around empowering developers and teams to work efficiently and securely"
+    },
+    "channels": [
+      "a landing page hero",
+      "an Instagram caption",
+      "X post",
+      "a changelog",
+      "an X post",
+      "a LinkedIn post",
+      "a comparison page",
+      "a short blog intro",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "product announcement",
+      "case study",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "website",
+      "conference abstract",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Glossier",
+    "category": "Consumer",
+    "voice": {
+      "tone": "lighthearted and humorous",
+      "personality": [
+        "friendly",
+        "inviting",
+        "humorous",
+        "lighthearted",
+        "youthful",
+        "playful",
+        "innovative"
+      ],
+      "voice_summary": "Glossier's voice is casual, playful, and inviting, making customers feel like they're part of a friendly conversation"
+    },
+    "channels": [
+      "a landing page hero",
+      "TikTok caption",
+      "Instagram caption",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "an email body",
+      "a push notification",
+      "a product description",
+      "a FAQ answer",
+      "a landing hero",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Grammarly",
+    "category": "SaaS",
+    "voice": {
+      "tone": "supportive and encouraging",
+      "personality": [
+        "helpful",
+        "empowering",
+        "intelligent",
+        "approachable"
+      ],
+      "voice_summary": "Grammarly's voice is helpful and empowering, guiding users to improve their writing with confidence"
+    },
+    "channels": [
+      "feature announcement",
+      "push notification",
+      "ad",
+      "onboarding step",
+      "product description",
+      "social ad",
+      "landing hero",
+      "blog intro",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "onboarding message",
+      "in-product tooltip",
+      "community post",
+      "email",
+      "landing page",
+      "an ad",
+      "webinar invite",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Gusto",
+    "category": "Fintech",
+    "voice": {
+      "tone": "supportive and informative",
+      "personality": [
+        "friendly",
+        "helpful",
+        "transparent",
+        "supportive",
+        "approachable"
+      ],
+      "voice_summary": "Gusto simplifies payroll, HR, and benefits for small and medium-sized businesses with a user-friendly and supportive tone"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "pricing page",
+      "onboarding step",
+      "ad",
+      "product description",
+      "faq",
+      "landing hero",
+      "blog intro",
+      "linkedin post",
+      "an X post",
+      "homepage hero",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "LinkedIn post",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "website hero",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "social post",
+      "an ad",
+      "a community post",
+      "re-engagement email",
+      "comparison page",
+      "onboarding email"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "HashiCorp",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "expert guidance",
+      "personality": [
+        "results-driven",
+        "customer-focused",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "HashiCorp helps organizations do cloud right with a unified platform that automates workflows and serves as a central system of record"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "error message microcopy",
+      "LinkedIn",
+      "product announcement",
+      "case study",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "conference abstract",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "HubSpot",
+    "category": "B2B",
+    "voice": {
+      "tone": "supportive and results-driven",
+      "personality": [
+        "innovative",
+        "helpful",
+        "supportive",
+        "confident",
+        "results-driven",
+        "approachable"
+      ],
+      "voice_summary": "HubSpot's voice is approachable and helpful, making growing a business easier with innovative solutions"
+    },
+    "channels": [
+      "a landing page hero",
+      "blog",
+      "a changelog",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "a feature announcement",
+      "case study",
+      "email",
+      "a community post",
+      "an ad",
+      "X post"
+    ],
+    "examples": [
+      "A lead just revisited your pricing page for the third time. They are warm and ready. Tap to reach out while the moment is right."
+    ],
+    "total_samples": 31
+  },
+  {
+    "brand": "Hugging Face",
+    "category": "AI",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "collaborative",
+        "ambitious",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Hugging Face is building the future of AI with a collaborative platform for machine learning"
+    },
+    "channels": [
+      "a model-card intro template",
+      "a landing page hero",
+      "a comparison-page intro",
+      "an X post",
+      "a dataset-launch blurb",
+      "a LinkedIn post",
+      "a conference-talk abstract",
+      "an enterprise-hub pitch",
+      "a research-blog intro",
+      "a short blog intro",
+      "an email body",
+      "a partner-announcement blurb",
+      "a getting-started tutorial intro",
+      "a community-newsletter intro",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "a changelog entry",
+      "a landing hero",
+      "a feature announcement",
+      "a Spaces feature blurb",
+      "a product-page section",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "JetBrains",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "confidently helpful",
+      "personality": [
+        "efficient",
+        "innovative",
+        "professional",
+        "supportive"
+      ],
+      "voice_summary": "JetBrains empowers developers with professional tools for productive development"
+    },
+    "channels": [
+      "a landing page hero",
+      "an onboarding tooltip",
+      "a comparison-page intro",
+      "an upgrade prompt",
+      "a renewal email",
+      "a conference session description",
+      "a student-offer email",
+      "testimonial framing",
+      "an X post",
+      "a feature spotlight",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "a B2B sales one-liner",
+      "a changelog highlight",
+      "a push notification",
+      "a webinar promo",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "a changelog entry",
+      "error message microcopy",
+      "a landing hero",
+      "a comparison page intro",
+      "a feature announcement",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Klarna",
+    "category": "Fintech",
+    "voice": {
+      "tone": "supportive and inclusive",
+      "personality": [
+        "helpful",
+        "modern",
+        "approachable",
+        "flexible"
+      ],
+      "voice_summary": "Klarna's voice is approachable and helpful, as seen in phrases like 'We've got you covered'"
+    },
+    "channels": [
+      "a checkout-page message",
+      "a landing page hero",
+      "a comparison-page intro",
+      "a travel-booking promo",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a discovery-feature blurb",
+      "a short blog intro",
+      "an email body",
+      "a merchant-facing blurb",
+      "a push notification",
+      "a loyalty-feature blurb",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "an onboarding screen",
+      "error message microcopy",
+      "an app push notification",
+      "a landing hero",
+      "a comparison page intro",
+      "a help-center intro",
+      "an onboarding step",
+      "a feature announcement",
+      "a budgeting-feature blurb",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Linear",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "confident and direct",
+      "personality": [
+        "streamlined",
+        "action-oriented",
+        "intelligent",
+        "modern"
+      ],
+      "voice_summary": "Linear's voice is shaped by its focus on simplicity, speed, and scalability for modern product teams"
+    },
+    "channels": [
+      "a landing page hero",
+      "pricing page",
+      "ad",
+      "onboarding step",
+      "push notification",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "a feature announcement",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "an Instagram caption",
+      "event booth",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Liquid Death",
+    "category": "Consumer",
+    "voice": {
+      "tone": "dark humor",
+      "personality": [
+        "sarcastic",
+        "dark",
+        "playful",
+        "edgy"
+      ],
+      "voice_summary": "Liquid Death's voice is a darkly comedic, edgy, and playful tone that pokes fun at mortality and consumerism"
+    },
+    "channels": [
+      "a landing page hero",
+      "a sponsorship blurb",
+      "an X post",
+      "a LinkedIn post",
+      "a loyalty-club invitation",
+      "an email body",
+      "a Halloween campaign concept",
+      "a push notification",
+      "a billboard line",
+      "a workplace-vending promo",
+      "a flavor-launch teaser",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "a landing hero",
+      "a feature announcement",
+      "a parenting-angle social post",
+      "a community post",
+      "an ad",
+      "a product-launch caption",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Loom",
+    "category": "SaaS",
+    "voice": {
+      "tone": "supportive and encouraging",
+      "personality": [
+        "helpful",
+        "friendly",
+        "confident",
+        "innovative"
+      ],
+      "voice_summary": "Loom's voice is approachable and empowering, making video communication feel effortless and essential for productivity"
+    },
+    "channels": [
+      "tweet",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "in-app prompt",
+      "blog",
+      "landing hero",
+      "blog intro",
+      "an X post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "in-app nudge",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "error message microcopy",
+      "feature blurb",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "campaign",
+      "landing page",
+      "a community post",
+      "an ad",
+      "comparison page",
+      "onboarding email",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 38
+  },
+  {
+    "brand": "Mailchimp",
+    "category": "SaaS",
+    "voice": {
+      "tone": "supportive and encouraging",
+      "personality": [
+        "friendly",
+        "innovative",
+        "encouraging",
+        "helpful",
+        "supportive",
+        "confident",
+        "approachable"
+      ],
+      "voice_summary": "Mailchimp's voice is friendly and approachable, making marketing and automation easy for businesses"
+    },
+    "channels": [
+      "landing page hero",
+      "blog",
+      "Instagram caption",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a push notification",
+      "an error message microcopy",
+      "a release notes entry",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "SMS",
+      "a landing hero",
+      "LinkedIn",
+      "in-app message",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "Facebook ad",
+      "website",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Mercury",
+    "category": "Fintech",
+    "voice": {
+      "tone": "expert guidance",
+      "personality": [
+        "informative",
+        "innovative",
+        "professional",
+        "supportive"
+      ],
+      "voice_summary": "Mercury's voice is straightforward and informative, guiding users through financial management and growth."
+    },
+    "channels": [
+      "a landing page hero",
+      "an invoicing-feature blurb",
+      "a comparison-page intro",
+      "a scaling-stage pitch",
+      "an X post",
+      "a LinkedIn post",
+      "an educational blog intro",
+      "a developer-docs intro",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "a feature blurb",
+      "a trust-and-safety blurb",
+      "a year-end finance checklist intro",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "a changelog entry",
+      "a comparison page intro",
+      "an onboarding step",
+      "a feature announcement",
+      "a product-page section",
+      "a community post",
+      "an ad",
+      "a webinar invite",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Miro",
+    "category": "SaaS",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "collaborative",
+        "dynamic",
+        "innovative",
+        "empowering"
+      ],
+      "voice_summary": "Miro's voice is a perfect blend of innovation and collaboration, empowering teams to work smarter and faster."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "faq",
+      "twitter",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "linkedin post",
+      "an X post",
+      "homepage hero",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "LinkedIn post",
+      "FAQ answer",
+      "a push notification",
+      "onboarding tooltip",
+      "a product description",
+      "seasonal social post",
+      "error message microcopy",
+      "a changelog entry",
+      "a feature announcement",
+      "sales one-pager",
+      "community post",
+      "email",
+      "re-engagement email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "social post",
+      "webinar invite",
+      "comparison page",
+      "launch post",
+      "an Instagram caption",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Mistral",
+    "category": "AI",
+    "voice": {
+      "tone": "confident and informative",
+      "personality": [
+        "ambitious",
+        "expert",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Mistral empowers organizations to build tailored AI systems to solve the world's hardest problems"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "keynote slide",
+      "landing hero",
+      "case study intro",
+      "blog intro",
+      "linkedin post",
+      "testimonial framing",
+      "an X post",
+      "homepage hero",
+      "an email body",
+      "LinkedIn post",
+      "a short blog intro",
+      "FAQ answer",
+      "a product description",
+      "a changelog entry",
+      "a feature announcement",
+      "community post",
+      "email",
+      "twitter announcement",
+      "a community post",
+      "an ad",
+      "changelog",
+      "launch post",
+      "webinar invite",
+      "an Instagram caption",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 31
+  },
+  {
+    "brand": "Monday",
+    "category": "SaaS",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "efficient",
+        "intelligent",
+        "innovative",
+        "results-driven"
+      ],
+      "voice_summary": "Empowering teams to work seamlessly with AI agents, monday.com streamlines workflows and amplifies productivity"
+    },
+    "channels": [
+      "a landing page hero",
+      "a case-study teaser",
+      "a comparison-page intro",
+      "a social ad",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a partner-integration announcement",
+      "a landing-page hero",
+      "a push notification",
+      "a webinar promo",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "an in-product upsell",
+      "a changelog entry",
+      "a year-kickoff email",
+      "an enterprise trust blurb",
+      "a product-update email",
+      "a landing hero",
+      "a comparison page intro",
+      "an onboarding checklist intro",
+      "a feature announcement",
+      "a recruiting-ops blurb",
+      "a community post",
+      "an Instagram caption",
+      "an email"
+    ],
+    "examples": [],
+    "total_samples": 32
+  },
+  {
+    "brand": "MongoDB",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "confident and empowering",
+      "personality": [
+        "intuitive",
+        "secure",
+        "innovative",
+        "scalable"
+      ],
+      "voice_summary": "MongoDB empowers builders to adapt data models quickly, driving faster innovation and improved productivity."
+    },
+    "channels": [
+      "tweet",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "quickstart",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "an ad",
+      "changelog",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 38
+  },
+  {
+    "brand": "Netlify",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "helpful and informative",
+      "personality": [
+        "technical",
+        "informative",
+        "flexible",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Netlify empowers developers to build and deploy web applications with ease and speed"
+    },
+    "channels": [
+      "landing page hero",
+      "a landing page hero",
+      "pricing page",
+      "feature announcement",
+      "onboarding step",
+      "in-app banner",
+      "faq",
+      "landing hero",
+      "case study intro",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "LinkedIn post",
+      "a short blog intro",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "error message microcopy",
+      "newsletter",
+      "tutorial intro",
+      "a feature announcement",
+      "community post",
+      "email",
+      "twitter announcement",
+      "social post",
+      "an ad",
+      "changelog",
+      "a community post",
+      "comparison page",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Nike",
+    "category": "Consumer",
+    "voice": {
+      "tone": "Motivational and upbeat",
+      "personality": [
+        "upbeat",
+        "empowering",
+        "motivational",
+        "youthful",
+        "innovative",
+        "bold"
+      ],
+      "voice_summary": "Empowering athletes to push beyond limits with bold, innovative spirit"
+    },
+    "channels": [
+      "a landing page hero",
+      "push notification",
+      "Instagram caption",
+      "an X post",
+      "a testimonial framing",
+      "a comparison page",
+      "an email body",
+      "a short blog intro",
+      "a push notification",
+      "a product description",
+      "social caption",
+      "billboard",
+      "a landing hero",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "a blog intro"
+    ],
+    "examples": [
+      "The road's calling and you've got one run in you. No excuses, no perfect moment, just go. Lace up and play wild. Tap to start."
+    ],
+    "total_samples": 34
+  },
+  {
+    "brand": "Notion",
+    "category": "SaaS",
+    "voice": {
+      "tone": "helpful and direct",
+      "personality": [
+        "efficient",
+        "powerful",
+        "simple",
+        "innovative"
+      ],
+      "voice_summary": "Notion's voice is simple, powerful, and always focused on productivity and efficiency"
+    },
+    "channels": [
+      "landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "push notification",
+      "product description",
+      "app store description",
+      "blog intro",
+      "linkedin post",
+      "testimonial framing",
+      "an X post",
+      "homepage hero",
+      "a short blog intro",
+      "an email body",
+      "LinkedIn post",
+      "FAQ answer",
+      "website section",
+      "a push notification",
+      "website banner",
+      "a product description",
+      "community forum post",
+      "a changelog entry",
+      "sales deck slide",
+      "a feature announcement",
+      "in-product tooltip",
+      "community post",
+      "email",
+      "re-engagement email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "onboarding email",
+      "an Instagram caption"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Oatly",
+    "category": "Consumer",
+    "voice": {
+      "tone": "matter-of-fact",
+      "personality": [
+        "honest",
+        "informative",
+        "straightforward",
+        "eco-conscious"
+      ],
+      "voice_summary": "Oatly's voice is straightforward and informative, making it easier for people to live healthier lives without recklessly taxing the planet's resources."
+    },
+    "channels": [
+      "tweet",
+      "feature announcement",
+      "ad",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "community post",
+      "email",
+      "landing page",
+      "social post",
+      "an ad",
+      "changelog",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Okta",
+    "category": "B2B",
+    "voice": {
+      "tone": "confident and authoritative",
+      "personality": [
+        "powerful",
+        "technical",
+        "secure",
+        "extensible",
+        "confident",
+        "authoritative"
+      ],
+      "voice_summary": "Okta secures identities with a powerful and extensible platform, putting identity at the heart of the stack"
+    },
+    "channels": [
+      "a landing page hero",
+      "blog",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a short blog intro",
+      "a blog intro",
+      "a push notification",
+      "a release notes entry",
+      "a product description",
+      "an FAQ answer",
+      "a changelog entry",
+      "a landing hero",
+      "LinkedIn",
+      "product announcement",
+      "an onboarding step",
+      "a feature announcement",
+      "case study",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "conference abstract",
+      "X post"
+    ],
+    "examples": [
+      "Unusual sign-in detected on a privileged account. Okta has stepped up verification and held the session. Tap to review the activity and confirm."
+    ],
+    "total_samples": 36
+  },
+  {
+    "brand": "OpenAI",
+    "category": "AI",
+    "voice": {
+      "tone": "informative and forward-thinking",
+      "personality": [
+        "collaborative",
+        "ambitious",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "OpenAI is building safe and beneficial AGI to benefit all of humanity"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "faq",
+      "research page",
+      "landing hero",
+      "blog intro",
+      "event invite",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "docs",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "newsletter",
+      "LinkedIn",
+      "product update",
+      "a feature announcement",
+      "email",
+      "announcement",
+      "landing page",
+      "social post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "trust page",
+      "one-pager",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Patagonia",
+    "category": "Consumer",
+    "voice": {
+      "tone": "urgent and encouraging",
+      "personality": [
+        "outdoorsy",
+        "responsible",
+        "passionate"
+      ],
+      "voice_summary": "Patagonia's voice is relentless in nature, driven by activism and a passion for the environment"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "in-store sign",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "a product description",
+      "release notes",
+      "LinkedIn",
+      "a feature announcement",
+      "campaign",
+      "email",
+      "community post",
+      "landing page",
+      "social post",
+      "an ad",
+      "a community post",
+      "comparison page",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 42
+  },
+  {
+    "brand": "Plaid",
+    "category": "Fintech",
+    "voice": {
+      "tone": "confident and helpful",
+      "personality": [
+        "secure",
+        "customer-focused",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Plaid's voice is built for fintechs and developers, offering a straightforward and secure way to move money online"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "product description",
+      "landing hero",
+      "an X post",
+      "FAQ",
+      "Instagram",
+      "a short blog intro",
+      "FAQ answer",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "developer docs",
+      "a feature announcement",
+      "community post",
+      "email",
+      "event banner",
+      "social post",
+      "a community post",
+      "changelog",
+      "landing page",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Postman",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "professional and helpful",
+      "personality": [
+        "efficient",
+        "collaborative",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Postman streamlines API workflows with AI-native tools and integrations."
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "product description",
+      "in-app banner",
+      "faq",
+      "twitter",
+      "landing hero",
+      "blog intro",
+      "linkedin post",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "LinkedIn post",
+      "an email body",
+      "FAQ answer",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "a feature announcement",
+      "community post",
+      "email",
+      "social post",
+      "an ad",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "onboarding email",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Railway",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "helpful and informative",
+      "personality": [
+        "streamlined",
+        "customer-focused",
+        "confident",
+        "technical"
+      ],
+      "voice_summary": "Railway's voice is straightforward and professional, focusing on simplicity and ease of use for developers"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "pricing page",
+      "product description",
+      "twitter",
+      "landing hero",
+      "testimonial framing",
+      "linkedin post",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "LinkedIn post",
+      "FAQ answer",
+      "support reply",
+      "a push notification",
+      "a product description",
+      "docs landing",
+      "quickstart hero",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "website hero",
+      "a feature announcement",
+      "email",
+      "social post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "status update",
+      "onboarding email",
+      "push"
+    ],
+    "examples": [
+      "Zero config. One push. Live in a minute. This is what shipping is supposed to feel like. A better future is now boarding."
+    ],
+    "total_samples": 35
+  },
+  {
+    "brand": "Ramp",
+    "category": "Fintech",
+    "voice": {
+      "tone": "confident and helpful",
+      "personality": [
+        "intuitive",
+        "efficient",
+        "ambitious",
+        "innovative"
+      ],
+      "voice_summary": "Ramp's AI operating system streamlines back-office tasks, saving time and money for ambitious companies"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "social ad",
+      "landing hero",
+      "testimonial framing",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "careers page",
+      "release notes",
+      "in-product prompt",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "event banner",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Razer",
+    "category": "Gaming",
+    "voice": {
+      "tone": "aggressive and bold",
+      "personality": [
+        "edgy",
+        "high-tech",
+        "competitive",
+        "gaming-focused"
+      ],
+      "voice_summary": "BUILT FOR BATTLE. READY FOR THE GRIND"
+    },
+    "channels": [
+      "tweet",
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "push notification",
+      "product description",
+      "landing hero",
+      "product launch",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "gift guide",
+      "in-store display",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "bundle promo",
+      "a push notification",
+      "product page",
+      "promo",
+      "a product description",
+      "error message microcopy",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 42
+  },
+  {
+    "brand": "Replicate",
+    "category": "AI",
+    "voice": {
+      "tone": "informative and helpful",
+      "personality": [
+        "collaborative",
+        "pragmatic",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Replicate empowers developers to run, fine-tune, and deploy custom AI models with ease"
+    },
+    "channels": [
+      "tweet",
+      "a landing page hero",
+      "pricing page",
+      "ad",
+      "onboarding step",
+      "feature announcement",
+      "product description",
+      "blog",
+      "landing hero",
+      "tutorial",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "quickstart",
+      "a LinkedIn post",
+      "a short blog intro",
+      "FAQ answer",
+      "product page",
+      "docs",
+      "a product description",
+      "release notes",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "changelog",
+      "social post",
+      "comparison page",
+      "onboarding email",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 40
+  },
+  {
+    "brand": "Replit",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "encouraging and supportive",
+      "personality": [
+        "encouraging",
+        "empowering",
+        "supportive",
+        "fast-paced",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Replit empowers users to build and create with ease, speed, and collaboration"
+    },
+    "channels": [
+      "a landing page hero",
+      "push notification",
+      "Instagram caption",
+      "X post",
+      "a changelog",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a comparison page",
+      "app store",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "an error message microcopy",
+      "a release notes entry",
+      "a product description",
+      "newsletter",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "an onboarding step",
+      "in-app message",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "an Instagram caption",
+      "a blog intro"
+    ],
+    "examples": [
+      "Your app is built and waiting. One tap and it goes live, ready to share with the world. Ship it.",
+      "Ten shipped projects. Remember when one felt impossible? Look at you now. Keep that momentum going, builder. The next one is just a Repl away."
+    ],
+    "total_samples": 35
+  },
+  {
+    "brand": "Revolut",
+    "category": "Fintech",
+    "voice": {
+      "tone": "empowering and secure",
+      "personality": [
+        "secure",
+        "global",
+        "smart",
+        "innovative",
+        "bold"
+      ],
+      "voice_summary": "Revolut redefines banking with a bold and innovative approach, offering global freedom and powerful daily banking"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "push notification",
+      "onboarding step",
+      "product description",
+      "in-app prompt",
+      "social ad",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "in-app message",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Riot Games",
+    "category": "Gaming",
+    "voice": {
+      "tone": "excited and welcoming",
+      "personality": [
+        "authentic",
+        "playful",
+        "enthusiastic",
+        "diverse"
+      ],
+      "voice_summary": "Riot Games' voice is energetic and inclusive, celebrating individuality and creativity"
+    },
+    "channels": [
+      "a landing page hero",
+      "push notification",
+      "blog",
+      "Instagram caption",
+      "a changelog",
+      "an X post",
+      "a testimonial framing",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "a product description",
+      "social caption",
+      "a changelog entry",
+      "a landing hero",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Robinhood",
+    "category": "Fintech",
+    "voice": {
+      "tone": "Direct and helpful",
+      "personality": [
+        "approachable",
+        "no-nonsense",
+        "straightforward",
+        "confident"
+      ],
+      "voice_summary": "Empowering investors with straightforward language and no-frills promises"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "ad",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "Instagram",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "error message microcopy",
+      "a changelog entry",
+      "onboarding screen",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "comparison page",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Roblox",
+    "category": "Gaming",
+    "voice": {
+      "tone": "inviting and energetic",
+      "personality": [
+        "empowering",
+        "imaginative",
+        "youthful",
+        "playful",
+        "innovative"
+      ],
+      "voice_summary": "Roblox invites users to sign up and start having fun, conveying a playful and imaginative brand voice"
+    },
+    "channels": [
+      "a landing page hero",
+      "a mobile-app onboarding screen",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a creator-program invite",
+      "a short blog intro",
+      "a brand-partnership pitch",
+      "a push notification",
+      "a product description",
+      "a summer-event teaser",
+      "error message microcopy",
+      "a changelog entry",
+      "a developer-monetization post",
+      "a landing hero",
+      "a comparison page intro",
+      "a feature announcement",
+      "a tech-blog announcement",
+      "a community post",
+      "an ad",
+      "a music-artist collaboration invite",
+      "an Instagram caption",
+      "an email",
+      "a returning-player push notification",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 30
+  },
+  {
+    "brand": "Runway",
+    "category": "AI",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "forward-thinking",
+        "technical",
+        "helpful",
+        "ambitious",
+        "creative",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Building AI to simulate the world through merging art and science"
+    },
+    "channels": [
+      "a landing page hero",
+      "blog",
+      "Instagram caption",
+      "an Instagram caption",
+      "a changelog",
+      "an X post",
+      "a LinkedIn post",
+      "a comparison page",
+      "an email body",
+      "a blog intro",
+      "a push notification",
+      "a release notes entry",
+      "press release",
+      "a product description",
+      "a changelog entry",
+      "a FAQ answer",
+      "a landing hero",
+      "LinkedIn",
+      "product announcement",
+      "a feature announcement",
+      "email",
+      "a community post",
+      "an ad",
+      "website",
+      "conference abstract",
+      "X post"
+    ],
+    "examples": [
+      "Your scene is rendered and ready to watch. The world you imagined, generated in minutes. Tap to view and direct your next frame."
+    ],
+    "total_samples": 40
+  },
+  {
+    "brand": "Ryanair",
+    "category": "Consumer",
+    "voice": {
+      "tone": "playful and encouraging",
+      "personality": [
+        "inviting",
+        "adventurous",
+        "youthful",
+        "playful",
+        "energetic"
+      ],
+      "voice_summary": "Ryanair's voice is energetic and inviting, beckoning travelers to explore Europe's hidden gems"
+    },
+    "channels": [
+      "banner ad",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "push notification",
+      "social ad",
+      "landing hero",
+      "blog intro",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "community post",
+      "email",
+      "social post",
+      "an ad",
+      "comparison page",
+      "X post"
+    ],
+    "examples": [
+      "Still dreaming of Zadar? Those fares won't wait forever, and neither should you. Tap to grab your seat before summer fills up. Say yes!"
+    ],
+    "total_samples": 29
+  },
+  {
+    "brand": "Salesforce",
+    "category": "B2B",
+    "voice": {
+      "tone": "Professional and helpful",
+      "personality": [
+        "results-driven",
+        "confident",
+        "innovative",
+        "customer-centric"
+      ],
+      "voice_summary": "Salesforce empowers businesses to grow with innovative AI solutions"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "pricing page",
+      "ad",
+      "onboarding step",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "conference abstract",
+      "a LinkedIn post",
+      "Instagram",
+      "a short blog intro",
+      "FAQ answer",
+      "a product description",
+      "a changelog entry",
+      "LinkedIn",
+      "product announcement",
+      "a feature announcement",
+      "case study",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 36
+  },
+  {
+    "brand": "Scale AI",
+    "category": "AI",
+    "voice": {
+      "tone": "professional and informative",
+      "personality": [
+        "reliable",
+        "professional",
+        "advanced",
+        "technical"
+      ],
+      "voice_summary": "Reliable AI for the world's most important decisions"
+    },
+    "channels": [
+      "landing page section",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "twitter",
+      "landing hero",
+      "case study intro",
+      "blog intro",
+      "testimonial framing",
+      "linkedin post",
+      "an X post",
+      "Instagram",
+      "a short blog intro",
+      "LinkedIn post",
+      "an email body",
+      "FAQ answer",
+      "website section",
+      "a push notification",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "sales deck slide",
+      "a feature announcement",
+      "community post",
+      "email",
+      "an ad",
+      "changelog",
+      "webinar invite",
+      "comparison page",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Sentry",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "practical and straightforward",
+      "personality": [
+        "helpful",
+        "direct",
+        "technical"
+      ],
+      "voice_summary": "Sentry helps developers fix issues faster with context-driven debugging tools"
+    },
+    "channels": [
+      "tweet",
+      "flyer",
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "pricing page",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "quickstart",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "docs",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "community post",
+      "email",
+      "announcement",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "onboarding email",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "ServiceNow",
+    "category": "B2B",
+    "voice": {
+      "tone": "solution-focused",
+      "personality": [
+        "strategic",
+        "technological",
+        "productive",
+        "innovative"
+      ],
+      "voice_summary": "Transform service management for productivity and ROI with autonomous AI agents"
+    },
+    "channels": [
+      "flyer",
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "blog intro",
+      "linkedin post",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "product page",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "one-pager"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Slack",
+    "category": "SaaS",
+    "voice": {
+      "tone": "helpful and efficient",
+      "personality": [
+        "secure",
+        "efficient",
+        "productive",
+        "collaborative",
+        "innovative"
+      ],
+      "voice_summary": "Slack connects your team and multiplies what they can do with AI-powered tools and seamless collaboration."
+    },
+    "channels": [
+      "a landing page hero",
+      "a case-study teaser",
+      "a webinar invitation",
+      "a product-hunt launch comment",
+      "a partner marketing blurb",
+      "a feature announcement email",
+      "an X post",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "a status message template",
+      "a billboard line",
+      "a product description",
+      "release notes",
+      "a re-engagement email",
+      "a changelog entry",
+      "an in-app upsell nudge",
+      "a conference booth tagline",
+      "a landing hero",
+      "a comparison page intro",
+      "an onboarding step",
+      "a feature announcement",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Snowflake",
+    "category": "B2B",
+    "voice": {
+      "tone": "confidently informative",
+      "personality": [
+        "unifying",
+        "trusted",
+        "innovative",
+        "empowering"
+      ],
+      "voice_summary": "Snowflake empowers users to innovate faster and do more with their data through a fully managed, easy-to-use platform."
+    },
+    "channels": [
+      "a landing page hero",
+      "a customer-story teaser",
+      "a migration-page intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "a solution-brief intro",
+      "a short blog intro",
+      "an email body",
+      "a push notification",
+      "a product-update note",
+      "a product description",
+      "an FAQ answer",
+      "release notes",
+      "a healthcare-vertical pitch",
+      "a changelog entry",
+      "a CFO-facing one-pager intro",
+      "a landing hero",
+      "a comparison page intro",
+      "an onboarding step",
+      "an analyst-relations blurb",
+      "a feature announcement",
+      "a conference keynote teaser",
+      "a community post",
+      "an ad",
+      "a partner-listing blurb",
+      "an Instagram caption",
+      "an email",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Spotify",
+    "category": "Consumer",
+    "voice": {
+      "tone": "matter-of-fact",
+      "personality": [
+        "informative",
+        "neutral",
+        "formal",
+        "technical"
+      ],
+      "voice_summary": "Spotify's voice is formal and informative, prioritizing user privacy and personalization."
+    },
+    "channels": [
+      "a landing page hero",
+      "a privacy-settings intro",
+      "a family-plan explanation",
+      "a free-tier signup blurb",
+      "an X post",
+      "a podcast-feature notice",
+      "an offline-listening feature notice",
+      "a LinkedIn post",
+      "a feature explainer",
+      "a connected-devices help intro",
+      "an email body",
+      "a short blog intro",
+      "a data-controls help article intro",
+      "a Premium upgrade explanation",
+      "a product description",
+      "an FAQ answer",
+      "a language-selection screen intro",
+      "release notes",
+      "a changelog entry",
+      "a year-in-review feature intro",
+      "a comparison page intro",
+      "a feature announcement",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "a blog intro"
+    ],
+    "examples": [],
+    "total_samples": 32
+  },
+  {
+    "brand": "Steam",
+    "category": "Gaming",
+    "voice": {
+      "tone": "neutral and helpful",
+      "personality": [
+        "informative",
+        "direct",
+        "utilitarian",
+        "global"
+      ],
+      "voice_summary": "Steam's voice is direct and informative, listing features and options in a straightforward manner."
+    },
+    "channels": [
+      "help center",
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "developer email",
+      "landing hero",
+      "blog intro",
+      "an X post",
+      "a short blog intro",
+      "curated list",
+      "an email body",
+      "in-client prompt",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "a changelog entry",
+      "error message microcopy",
+      "store banner",
+      "a feature announcement",
+      "settings page",
+      "community post",
+      "email",
+      "support page",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Stripe",
+    "category": "Fintech",
+    "voice": {
+      "tone": "confident and supportive",
+      "personality": [
+        "reliable",
+        "adaptable",
+        "technical",
+        "comprehensive",
+        "supportive",
+        "collaborative",
+        "innovative",
+        "scalable"
+      ],
+      "voice_summary": "Stripe empowers businesses of all sizes with flexible and reliable financial infrastructure"
+    },
+    "channels": [
+      "push notification",
+      "ad",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "FAQ",
+      "a LinkedIn post",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "in-product empty state",
+      "careers page",
+      "a product description",
+      "podcast ad",
+      "release notes",
+      "a changelog entry",
+      "SMS",
+      "LinkedIn",
+      "community post",
+      "email",
+      "event banner",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "onboarding email",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Supabase",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "technical yet approachable",
+      "personality": [
+        "transparent",
+        "community-driven",
+        "innovative",
+        "scalable"
+      ],
+      "voice_summary": "Supabase empowers companies to accelerate growth and streamline work with its Postgres development platform"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "in-product empty state",
+      "careers page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "developer docs",
+      "a feature announcement",
+      "community post",
+      "email",
+      "event banner",
+      "landing page",
+      "an ad",
+      "changelog",
+      "a community post",
+      "webinar invite",
+      "comparison page",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Twilio",
+    "category": "B2B",
+    "voice": {
+      "tone": "confidently helpful",
+      "personality": [
+        "secure",
+        "innovative",
+        "customer-centric",
+        "flexible"
+      ],
+      "voice_summary": "Twilio empowers businesses to create seamless, personalized customer experiences through its AI-driven conversation platform"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "pricing page",
+      "in-app onboarding",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "docs",
+      "a product description",
+      "release notes",
+      "LinkedIn",
+      "case study",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "comparison page",
+      "event booth",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 33
+  },
+  {
+    "brand": "Twitch",
+    "category": "Gaming",
+    "voice": {
+      "tone": "excited and engaging",
+      "personality": [
+        "lively",
+        "playful",
+        "inclusive",
+        "energetic"
+      ],
+      "voice_summary": "Twitch's voice is energetic and lively, inviting users to discover the best live streams anywhere"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "in-app banner",
+      "twitter",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "Instagram",
+      "app promo",
+      "a short blog intro",
+      "an email body",
+      "re-engagement push",
+      "FAQ answer",
+      "a push notification",
+      "notification",
+      "onboarding tooltip",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "seasonal social post",
+      "email",
+      "landing page",
+      "social post",
+      "an ad",
+      "changelog",
+      "a community post",
+      "an Instagram caption"
+    ],
+    "examples": [],
+    "total_samples": 34
+  },
+  {
+    "brand": "Unity",
+    "category": "Gaming",
+    "voice": {
+      "tone": "helpful and informative",
+      "personality": [
+        "supportive",
+        "innovative",
+        "professional",
+        "flexible"
+      ],
+      "voice_summary": "Unity empowers creators to build and grow their projects with flexibility and precision"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "ad",
+      "onboarding step",
+      "product description",
+      "testimonial framing",
+      "an X post",
+      "FAQ",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "in-editor tooltip",
+      "careers page",
+      "release notes",
+      "a feature announcement",
+      "community post",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "documentation",
+      "changelog",
+      "webinar invite",
+      "conference abstract",
+      "push"
+    ],
+    "examples": [],
+    "total_samples": 30
+  },
+  {
+    "brand": "Vercel",
+    "category": "Dev Tools",
+    "voice": {
+      "tone": "confidently helpful",
+      "personality": [
+        "efficient",
+        "customer-focused",
+        "innovative",
+        "technical"
+      ],
+      "voice_summary": "Vercel empowers developers to build, scale, and secure a faster, more personalized web with ease"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "pricing page",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "conference abstract",
+      "template gallery",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "docs",
+      "a product description",
+      "release notes",
+      "error message microcopy",
+      "a changelog entry",
+      "newsletter",
+      "LinkedIn",
+      "case study",
+      "community post",
+      "email",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 37
+  },
+  {
+    "brand": "Webflow",
+    "category": "SaaS",
+    "voice": {
+      "tone": "empowering and optimistic",
+      "personality": [
+        "collaborative",
+        "ambitious",
+        "innovative",
+        "results-driven"
+      ],
+      "voice_summary": "Webflow empowers brands to build websites that drive results and resonate with humans and machines alike"
+    },
+    "channels": [
+      "tweet",
+      "a landing page hero",
+      "feature announcement",
+      "product description",
+      "in-app prompt",
+      "blog",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "product page",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "social post",
+      "an ad",
+      "a community post",
+      "webinar invite",
+      "comparison page",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Wendys",
+    "category": "Consumer",
+    "voice": {
+      "tone": "fun and casual",
+      "personality": [
+        "fresh",
+        "playful",
+        "craveable",
+        "inviting"
+      ],
+      "voice_summary": "Wendy's voice is playful and inviting, making you crave their food"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "push notification",
+      "onboarding step",
+      "ad",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a push notification",
+      "a product description",
+      "social caption",
+      "error message microcopy",
+      "a feature announcement",
+      "email",
+      "social post",
+      "a community post",
+      "an ad",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Wise",
+    "category": "Fintech",
+    "voice": {
+      "tone": "straightforward and helpful",
+      "personality": [
+        "smart",
+        "reliable",
+        "customer-focused",
+        "global"
+      ],
+      "voice_summary": "Wise moves billions for millions worldwide with a smart app and low-cost international transfers"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "onboarding step",
+      "product description",
+      "app store description",
+      "faq",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "Instagram",
+      "a short blog intro",
+      "an email body",
+      "FAQ answer",
+      "a push notification",
+      "product page",
+      "a product description",
+      "a changelog entry",
+      "error message microcopy",
+      "LinkedIn",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "changelog",
+      "comparison page",
+      "onboarding email",
+      "an Instagram caption",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 39
+  },
+  {
+    "brand": "Zendesk",
+    "category": "B2B",
+    "voice": {
+      "tone": "confident and helpful",
+      "personality": [
+        "expert",
+        "innovative",
+        "customer-centric"
+      ],
+      "voice_summary": "Zendesk's voice is driven by innovation and customer-centricity, empowering businesses to deliver high-quality service through AI-powered solutions"
+    },
+    "channels": [
+      "a landing page hero",
+      "pricing page",
+      "ad",
+      "onboarding step",
+      "feature announcement",
+      "product description",
+      "an Instagram caption",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "a LinkedIn post",
+      "an email body",
+      "a short blog intro",
+      "FAQ answer",
+      "a product description",
+      "release notes",
+      "a changelog entry",
+      "LinkedIn",
+      "case study",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "a community post",
+      "an ad",
+      "comparison page",
+      "conference abstract",
+      "push",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 35
+  },
+  {
+    "brand": "Zoom",
+    "category": "SaaS",
+    "voice": {
+      "tone": "forward-thinking",
+      "personality": [
+        "collaborative",
+        "technologically-advanced",
+        "innovative",
+        "customer-centric"
+      ],
+      "voice_summary": "Zoom's voice is about empowering connections and seamless collaboration"
+    },
+    "channels": [
+      "a landing page hero",
+      "feature announcement",
+      "onboarding step",
+      "product description",
+      "landing hero",
+      "blog intro",
+      "testimonial framing",
+      "an X post",
+      "conference abstract",
+      "a LinkedIn post",
+      "Instagram",
+      "an email body",
+      "a short blog intro",
+      "a product description",
+      "release notes",
+      "LinkedIn",
+      "case study",
+      "a feature announcement",
+      "email",
+      "landing page",
+      "an ad",
+      "webinar invite",
+      "comparison page",
+      "an Instagram caption",
+      "X post"
+    ],
+    "examples": [],
+    "total_samples": 30
+  }
+];
+
+/* 行业阵容映射：行业 → 4 个品牌 + 1 位主持人（声音差异最大化原则） */
+const INDUSTRY_LINEUP = {
+  Consumer:  { label:"消费品",  brands:["Ryanair","Revolut","Unity","Grammarly"], host:"Atlassian" },
+  SaaS:      { label:"SaaS",      brands:["Calendly","Grammarly","Atlassian","Plaid"], host:"Stripe" },
+  DevTools:  { label:"开发工具", brands:["Datadog","Unity","Atlassian","Stripe"], host:"Anthropic" },
+  Fintech:   { label:"金融科技", brands:["Stripe","Revolut","Plaid","Atlassian"], host:"Datadog" },
+  Gaming:    { label:"游戏",     brands:["Steam","Unity","Datadog","Ryanair"], host:"Grammarly" },
+  AI:        { label:"AI",       brands:["Adaption","Anthropic","Stripe","Datadog"], host:"Calendly" }
+};
+
+/* 主持人性格补充（用于 system prompt 与页面展示） */
+const HOST_DESC = {
+  Atlassian:"冷静、协作导向，习惯把讨论拉回「团队与结果」",
+  Stripe:"克制、数据导向，习惯追问「商业模式是否成立」",
+  Anthropic:"严谨、科学，关注长期主义与可靠性",
+  Datadog:"技术视角、理性拆解，善于发现「可观测、可验证」的机会",
+  Grammarly:"温和鼓励，善于把讨论收束成清晰可执行的表达",
+  Calendly:"高效直接，擅长简化复杂问题并给出行动指引"
+};
+
+/* 品牌固定头像色（同一场讨论中互不重复） */
+const BRAND_COLORS = {
+  Stripe:"#6366f1", Revolut:"#e11d48", Plaid:"#0ea5e9", Adaption:"#059669",
+  Anthropic:"#d97757", Datadog:"#7c3aed", Steam:"#475569", Unity:"#0f172a",
+  Calendly:"#eab308", Grammarly:"#10b981", Atlassian:"#2563eb", Ryanair:"#f97316"
+};
+
+/* 品牌头像色：已有映射优先，新品牌按名称哈希生成稳定色 */
+function brandColor(name){
+  const c = BRAND_COLORS[name];
+  if(c) return c;
+  let h = 0;
+  for(const ch of name) h = (h*31 + ch.codePointAt(0)) % 360;
+  return `hsl(${h},55%,50%)`;
+}
+
+/* 品类中文标签 */
+const CATEGORY_LABELS = { Fintech:"金融科技", "Dev Tools":"开发工具", Gaming:"游戏", B2B:"B2B", SaaS:"SaaS", Consumer:"消费品", AI:"AI", General:"通用" };
+
+/* 演示模式预录数据（便携榨汁杯 case，消费品阵容） */
+const DEMO_DATA = {
+  industry:"Consumer",
+  case:"便携榨汁杯：3 秒出汁、可拆卸清洗、USB 充电、随身携带，主打通勤与轻健康生活",
+  cards:[
+    { brand:"Ryanair", headlines:["包里有它，谁还需要果汁店？","3 秒，别让排队浪费你的夏天"], why:"Ryanair 的 tone 是 playful and encouraging，personality 是 energetic / adventurous：它天生爱把人往「轻装出发」的场景里推，所以把榨汁杯放进通勤与出游，用玩梗制造传播。" },
+    { brand:"Revolut", headlines:["把 3 秒投资在自己身上。","你的每日健康，重新定义。"], why:"Revolut 的 tone 是 empowering and secure，personality 是 bold / global：它擅长把日常行为升级成「掌控感」，于是把榨汁讲成每天 3 秒的健康投资。" },
+    { brand:"Unity", headlines:["换配方，就是换关卡。","榨一杯，也榨出你的创作欲。"], why:"Unity 的 tone 是 helpful and informative，personality 是 innovative / flexible：它相信「创造与掌控」，于是把榨汁变成可玩、可组合的每日创作。" },
+    { brand:"Grammarly", headlines:["干净，从第一口开始。","3 秒出汁，0 秒犹豫。"], why:"Grammarly 的 tone 是 supportive and encouraging，personality 是 helpful / empowering：它主张降低用户负担、让用户自信行动，所以文案短而从容，强调「不用想就会用」。" }
+  ],
+  round1:[
+    { speaker:"主持人", content:"各位，今天的产品是便携榨汁杯——3 秒出汁、可拆洗、塞进通勤包就走。它每天至少被使用两次，这本身就是最好的营销战场。Ryanair，你最懂「轻装上阵」，先来。" },
+    { speaker:"Ryanair", angle:"把「便携」变成一种出行态度", tagline:"包里有它，谁还需要果汁店？", content:"我先说：这杯子的主战场不是厨房，是你的包。3 秒出汁，比排队买果汁还快。" },
+    { speaker:"Revolut", angle:"把「3 秒出汁」翻译成「每天 3 秒的健康投资」", tagline:"把 3 秒投资在自己身上。", content:"Ryanair 说得热闹，但我想换个角度：这不是假期配件，是你每天对自己的小额投资。" },
+    { speaker:"Unity", angle:"把榨汁做成一天里最顺手的「每日关卡」", tagline:"换配方，就是换关卡。", content:"我支持场景化，但可以更「可玩」：每周一个新配方，就是给用户的每周新关卡。" },
+    { speaker:"Grammarly", angle:"降低用户的心智负担", tagline:"干净，从第一口开始。", content:"大家都想要传播，但传播的前提是零障碍：让用户不用想就会用。" }
+  ],
+  round2:[
+    { speaker:"Ryanair", target:"Grammarly", stance:"build-on", content:"Grammarly 说得对，但别把一杯果汁说得像写论文。它就该是出门前 10 秒的事——「顺手」才是它最值钱的地方。" },
+    { speaker:"Revolut", target:"Ryanair", stance:"disagree", content:"格局小了。这不是假期限定配件，而是每天都会发生的健康习惯。习惯，才值得用户长期付费。" },
+    { speaker:"Unity", target:"Revolut", stance:"agree", content:"同意「每日习惯」这个方向，我们更进一步：把习惯做成「可玩」的——每周新配方就是新关卡，复购率就是这么来的。" },
+    { speaker:"Grammarly", target:"Ryanair", stance:"agree", content:"赞同轻量化，但轻的不是功能，是用户的心智负担。文案越少，信任越强。" }
+  ],
+  summary:{
+    intro:"感谢各位。一轮玩梗、一轮交锋之后，结论其实很清晰。",
+    table:[
+      { brand:"Ryanair", point:"便携即场景：「包里有它」就是最好的广告" },
+      { brand:"Revolut", point:"这是每日健康习惯，不是假期配件" },
+      { brand:"Unity", point:"用「可玩性」（换配方=换关卡）设计复购" },
+      { brand:"Grammarly", point:"降低心智负担，少即是多" }
+    ],
+    consensus:[
+      "「便携 + 高频」是共同认定的基础盘",
+      "都认可用「每天 / 习惯」重构产品价值，而非单次功能",
+      "场景化表达优于参数罗列"
+    ],
+    divergences:[
+      { topic:"轻娱乐 vs 重价值", meaning:"Ryanair 用玩梗制造传播，Revolut 用「投资」建立价值感——反映「流量型品牌」与「价值型品牌」的打法差异" },
+      { topic:"做加法 vs 做减法", meaning:"Unity 想加入玩法与社区，Grammarly 主张砍掉负担——反映「增长型」与「信任型」品牌的取舍" }
+    ],
+    actions:[
+      "主推「通勤 10 秒」短视频：Ryanair 式玩梗开头 + Grammarly 式收尾文案（如「包里有它，谁还需要果汁店？」）",
+      "把产品包装成「每日健康习惯」：借鉴 Revolut 的「3 秒投资」话术，做 21 天打卡或订阅制",
+      "上线「每周新配方」挑战：借鉴 Unity 的关卡思维，用户晒配方即获得新品试用，拉动复购"
+    ]
+  }
+};
+
+
+/* ============================================================
+ * 逻辑层：设置、状态、LLM 编排、渲染、历史
+ * ============================================================ */
+
+/* ---------- 常量与工具 ---------- */
+const SETTINGS_KEY = "brandRoundtableSettings";
+const HISTORY_KEY = "brandRoundtableHistory";
+const $ = id => document.getElementById(id);
+function el(tag, cls, html){ const n=document.createElement(tag); if(cls) n.className=cls; if(html!=null) n.innerHTML=html; return n; }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function catOf(brand){ const v=BRAND_VOICES.find(b=>b.brand===brand); return CATEGORY_LABELS[v&&v.category]||(v&&v.category)||""; }
+
+/* ---------- 设置（localStorage） ---------- */
+function defaultSettings(){ return { baseUrl:"https://api.openai.com/v1", apiKey:"", model:"gpt-4o-mini", forceDemo:false }; }
+function loadSettings(){ try{ return Object.assign(defaultSettings(), JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")); }catch(e){ return defaultSettings(); } }
+function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+/* ---------- 历史（localStorage，最多 10 条） ---------- */
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"); }catch(e){ return []; } }
+function saveHistoryList(list){ localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); }
+const PIN_KEY = "brandRoundtablePinned";
+const FOLDER_KEY = "brandRoundtableFolders";
+function loadPinned(){ try{ return JSON.parse(localStorage.getItem(PIN_KEY)||"[]"); }catch(e){ return []; } }
+function savePinned(p){ localStorage.setItem(PIN_KEY, JSON.stringify(p)); }
+function loadFolders(){ try{ return JSON.parse(localStorage.getItem(FOLDER_KEY)||"[]"); }catch(e){ return []; } }
+function saveFolders(f){ localStorage.setItem(FOLDER_KEY, JSON.stringify(f)); }
+function idOf(h){ return h.id || ("t"+(h.ts||Date.now())); }
+function addHistory(entry){ const list=loadHistory(); list.unshift(Object.assign({ts:Date.now(), id:"h"+Date.now()+"_"+Math.random().toString(36).slice(2,8)}, entry)); saveHistoryList(list.slice(0,10)); renderHistorySidebar(); }
+
+/* ---------- 全局状态 ---------- */
+let settings = loadSettings();
+let currentLineup = null;   // 当前选中的阵容 {key,label,brands,host}
+let running = false;        // 是否正在运行
+let abortCtrl = null;       // 用于「停止」的 AbortController
+let skipAnim = false;       // 点击舞台可跳过打字动画
+
+/* ---------- 品牌资料附件 ---------- */
+const MAX_ATTACH = 5;             // 最多同时插入 5 份
+const MAX_FILE_BYTES = 200*1024;  // 单文件 ≤ 200KB
+const MAX_FILE_CHARS = 6000;      // 每个文件最多注入约 6000 字
+let attachments = [];             // [{name,size,chars,truncated,text}]
+
+function fmtSize(bytes){ return bytes>=1024 ? (bytes/1024).toFixed(1)+" KB" : bytes+" B"; }
+
+async function handleFiles(fileList){
+  for(const f of (fileList||[])){
+    if(attachments.length >= MAX_ATTACH){ showToast(`最多同时插入 ${MAX_ATTACH} 份资料`); break; }
+    if(!f.size){ showToast(`「${f.name}」为空文件，已跳过`); continue; }
+    if(f.size > MAX_FILE_BYTES){ showToast(`「${f.name}」超过 200KB，已跳过`); continue; }
+    try{
+      let text = await f.text();
+      if(!text.trim()){ showToast(`「${f.name}」无可读文本，已跳过`); continue; }
+      let truncated = false;
+      if(text.length > MAX_FILE_CHARS){ text = text.slice(0, MAX_FILE_CHARS); truncated = true; }
+      attachments.push({ name:f.name, size:f.size, chars:text.length, truncated, text });
+      renderAttachments();
+      showToast(`已插入「${f.name}」`);
+    }catch(e){ showToast(`读取「${f.name}」失败`); }
+  }
+}
+
+function renderAttachments(){
+  const box = $("attachList");
+  box.innerHTML = "";
+  attachments.forEach((a,i)=>{
+    const item = el("div","attach-item",`<span>📄</span><span class="a-name">${escapeHtml(a.name)}</span><span class="a-meta">${fmtSize(a.size)} · ${a.chars} 字${a.truncated?"（已截断）":""}</span>`);
+    const del = el("button","a-del","✕");
+    del.onclick = ()=>{ attachments.splice(i,1); renderAttachments(); };
+    item.appendChild(del);
+    box.appendChild(item);
+  });
+}
+
+/* 生成注入模型的资料文本块（空则返回空串） */
+function buildAttachmentsBlock(){
+  if(!attachments.length) return "";
+  const parts = attachments.map((a,i)=>{
+    const head = `【资料 ${i+1}】${a.name}`;
+    return head + "\n" + a.text + (a.truncated ? "\n（内容过长已截断）" : "");
+  });
+  return "\n\n【用户提供的品牌资料（请先理解资料内容，并据此校准每个品牌的声音与建议）】\n" + parts.join("\n\n---\n\n");
+}
+
+/* ---------- 行业选择与品牌预览 ---------- */
+function refreshPreview(){
+  const spec = INDUSTRY_LINEUP[$("industrySelect").value];
+  if(!spec) return;
+  currentLineup = { key:$("industrySelect").value, label:spec.label, brands:[...spec.brands], host:spec.host };
+  renderPreview();
+}
+function renderPreview(){
+  const box=$("brandPreview"); box.innerHTML="";
+  currentLineup.brands.forEach(b=>{
+    const c=brandColor(b);
+    box.appendChild(el("span","chip",`<span class="dot" style="background:${c}"></span>${escapeHtml(b)}`));
+  });
+  const h=brandColor(currentLineup.host);
+  box.appendChild(el("span","chip host",`<span class="dot" style="background:${h}"></span>${escapeHtml(currentLineup.host)}<span class="host-tag">主持人</span>`));
+}
+function shuffleLineup(){
+  const spec = INDUSTRY_LINEUP[currentLineup.key];
+  const arr = BRAND_VOICES.map(v=>v.brand).filter(b=>b!==spec.host);
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  currentLineup.brands = arr.slice(0,4);
+  renderPreview();
+}
+
+/* ---------- 状态栏与轻提示 ---------- */
+function setStatus(msg, kind){
+  const bar=$("statusBar");
+  bar.className = "status"+(kind?" "+kind:"");
+  bar.innerHTML = kind ? escapeHtml(msg) : `<span class="spinner"></span><span>${escapeHtml(msg)}</span>`;
+  bar.classList.remove("hidden");
+}
+function clearStatus(){ $("statusBar").classList.add("hidden"); }
+let toastTimer=null;
+function showToast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
+
+/* ---------- 舞台渲染基础 ---------- */
+function resetStage(){ const s=$("stage"); s.innerHTML=""; skipAnim=false; }
+function addSectionTitle(text){ $("stage").appendChild(el("div","section-title",`<span class="bar"></span><span>${escapeHtml(text)}</span>`)); }
+function renderCaseHeader(lineup, caseTextOverride){
+  const c = caseTextOverride || $("productInput").value.trim() || "（未填写产品描述）";
+  const attachNote = attachments.length ? ` · 📎 资料 ${attachments.length} 份` : "";
+  const card = el("div","case-card");
+  card.innerHTML = `<div class="case-title">🛍 ${escapeHtml(c)}</div>
+    <div class="case-meta">行业：${escapeHtml(lineup.label)} · 目标市场：${escapeHtml($("marketSelect").value)} · 阵容：${escapeHtml(lineup.brands.join(" / "))} + 主持人 ${escapeHtml(lineup.host)}${attachNote}</div>`;
+  $("stage").appendChild(card);
+}
+function avatarEl(brand){
+  const a = el("div","avatar");
+  a.style.background = brandColor(brand);
+  a.textContent = brand ? brand.charAt(0) : "?";
+  return a;
+}
+
+/* 打字机效果：点击舞台可随时跳过 */
+async function typeText(node, text){
+  if(skipAnim || !text){ node.textContent = text||""; return; }
+  const step = Math.max(3, Math.min(16, Math.round(1400/text.length)));
+  for(let i=1;i<=text.length;i++){
+    node.textContent = text.slice(0,i);
+    if(skipAnim){ node.textContent = text; break; }
+    await sleep(step);
+  }
+}
+
+/* 主持人：居中卡片 */
+function appendHostRow(m){
+  const row = el("div","bubble-row host-row");
+  const card = el("div","host-card");
+  card.appendChild(el("div","host-label",`主持人 · ${escapeHtml(m.speaker||"")}`));
+  const p = el("div");
+  card.appendChild(p);
+  row.appendChild(card);
+  return { row, textNode:p };
+}
+async function renderHost(m, instant){
+  const {row, textNode} = appendHostRow(m);
+  $("stage").appendChild(row);
+  if(instant){ textNode.textContent = m.content||""; }
+  else { await typeText(textNode, m.content||""); await sleep(280); }
+}
+
+/* 第一轮：品牌陈述气泡（角度 + 文案） */
+function appendRound1Row(m){
+  const brand = m.speaker||"";
+  const row = el("div","bubble-row");
+  row.appendChild(avatarEl(brand));
+  const body = el("div","bubble-body");
+  body.appendChild(el("div","bubble-head",`<span class="bubble-name">${escapeHtml(brand)}</span><span class="bubble-cat">${escapeHtml(catOf(brand))}</span>`));
+  const bubble = el("div","bubble");
+  if(m.angle) bubble.appendChild(el("span","angle-chip",`角度：${escapeHtml(m.angle)}`));
+  const p = el("div"); bubble.appendChild(p);
+  if(m.tagline) bubble.appendChild(el("span","tagline",`「${escapeHtml(m.tagline)}」`));
+  body.appendChild(bubble); row.appendChild(body);
+  return { row, textNode:p };
+}
+async function renderRound1Bubble(m, instant){
+  const {row, textNode} = appendRound1Row(m);
+  $("stage").appendChild(row);
+  const text = m.content || m.tagline || "";
+  if(instant){ textNode.textContent = text; }
+  else { await typeText(textNode, text); await sleep(240); }
+}
+
+/* 第二轮：交锋气泡（立场徽标 + 回应目标） */
+const STANCE_MAP = { agree:["赞同","agree"], disagree:["反驳","disagree"], "build-on":["加码","build-on"] };
+function appendRound2Row(m){
+  const brand = m.speaker||"";
+  const row = el("div","bubble-row");
+  row.appendChild(avatarEl(brand));
+  const body = el("div","bubble-body");
+  const st = STANCE_MAP[m.stance]||[m.stance||"回应",""];
+  const target = m.target ? `<span class="target-chip">↳ 回应 ${escapeHtml(m.target)}</span>` : "";
+  body.appendChild(el("div","bubble-head",`<span class="bubble-name">${escapeHtml(brand)}</span><span class="bubble-cat">${escapeHtml(catOf(brand))}</span>`));
+  body.appendChild(el("div","",`<span class="stance ${st[1]}">${escapeHtml(st[0])}</span>${target}`));
+  const bubble = el("div","bubble"); const p=el("div"); bubble.appendChild(p);
+  body.appendChild(bubble); row.appendChild(body);
+  return { row, textNode:p };
+}
+async function renderRound2Bubble(m, instant){
+  const {row, textNode} = appendRound2Row(m);
+  $("stage").appendChild(row);
+  if(instant){ textNode.textContent = m.content||""; }
+  else { await typeText(textNode, m.content||""); await sleep(240); }
+}
+
+/* 主持人五段式总结 */
+function renderSummary(r){
+  const s = (r && r.summary) ? r.summary : (r||{});
+  const card = el("div","summary-card");
+  let html = `<div class="summary-intro">🎙 ${escapeHtml(s.intro||"")}</div>`;
+  html += `<div class="sum-block"><div class="sum-title">📋 核心观点摘要</div>
+    <table class="mini"><tr><th>品牌</th><th>一句话观点</th></tr>
+    ${(s.table||[]).map(t=>`<tr><td>${escapeHtml(t.brand)}</td><td>${escapeHtml(t.point)}</td></tr>`).join("")}
+    </table></div>`;
+  html += `<div class="sum-block"><div class="sum-title">🤝 共识</div><ul class="sum">${(s.consensus||[]).map(c=>`<li>${escapeHtml(c)}</li>`).join("")}</ul></div>`;
+  html += `<div class="sum-block"><div class="sum-title">⚡ 分歧点</div><ul class="sum diff">${(s.divergences||[]).map(d=>`<li><b>${escapeHtml(d.topic)}：</b>${escapeHtml(d.meaning)}</li>`).join("")}</ul></div>`;
+  html += `<div class="sum-block"><div class="sum-title">🛠 可执行建议 ×3</div>${(s.actions||[]).map((a,i)=>`<div class="action-item"><span class="num">${i+1}</span><span>${escapeHtml(a)}</span></div>`).join("")}</div>`;
+  card.innerHTML = html;
+  $("stage").appendChild(card);
+}
+
+/* 灵感卡网格 */
+async function renderCards(cards){
+  addSectionTitle("品牌灵感卡");
+  const grid = el("div","cards-grid");
+  $("stage").appendChild(grid);
+  for(const c of (cards||[])){
+    const color = brandColor(c.brand);
+    const card = el("div","inspire-card");
+    card.style.setProperty("--bc", color);
+    card.innerHTML = `<div class="card-brand"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:${color}"></span>${escapeHtml(c.brand)}<span class="card-cat">${escapeHtml(catOf(c.brand))}</span></div>
+      <ul class="headline">${(c.headlines||[]).map(h=>`<li>${escapeHtml(h)}</li>`).join("")}</ul>
+      <div class="why">${escapeHtml(c.why||"")}</div>`;
+    grid.appendChild(card);
+    if(!skipAnim) await sleep(160);
+  }
+}
+
+/* ---------- LLM 调用 ---------- */
+function voiceCardFor(name){
+  const custom = loadCustoms().find(c=>c.name===name);
+  if(custom){
+    const sp = (custom.systemPrompt||"").trim();
+    return { brand:name, industry:custom.industry||"自定义",
+             tone: sp ? "自定义品牌（严格按用户指令扮演）" : "（自定义品牌，请按公众认知中的品牌风格扮演）",
+             personality:["custom"],
+             voice_summary: sp || "用户自定义品牌，无内置声音数据，请按公众认知中的品牌风格扮演", examples:[] };
+  }
+  const v = BRAND_VOICES.find(b=>b.brand===name);
+  if(!v) return { brand:name, tone:"（自定义品牌，请按公众认知中的品牌风格扮演）", personality:["custom"], voice_summary:"用户自定义品牌，无内置声音数据", examples:[] };
+  return { brand:name, tone:v.voice.tone, personality:(v.voice.personality||[]).slice(0,3), voice_summary:v.voice.voice_summary, examples:(v.examples||[]).slice(0,3) };
+}
+/* 生成「本场声音卡」文本：只注入本场 4 品牌 + 主持人，省 token */
+function lineupBlock(lineup){
+  const list = lineup.brands.map(voiceCardFor);
+  list.push(Object.assign(voiceCardFor(lineup.host), { brand:`主持人 · ${lineup.host}`, host_desc:HOST_DESC[lineup.host]||"" }));
+  return JSON.stringify(list, null, 2);
+}
+function caseText(){ return $("productInput").value.trim() || "（未填写，请描述你的产品）"; }
+
+/* 解析模型返回的 JSON（兼容 markdown 代码块包裹） */
+function parseJSON(text){
+  let t = String(text).trim();
+  t = t.replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  const start = t.search(/[\[{]/);
+  if(start>0) t = t.slice(start);
+  try{ return JSON.parse(t); }
+  catch(e){ throw new Error("模型返回无法解析的 JSON："+t.slice(0,120)); }
+}
+
+async function doLLM(system, user, temperature){
+  if(!settings.apiKey) throw new Error("未配置 API Key");
+  const body = { model:settings.model, temperature, messages:[{role:"system",content:system},{role:"user",content:user}], max_tokens:3000 };
+  const run = async withJsonMode => {
+    const b = Object.assign({}, body);
+    if(withJsonMode) b.response_format = { type:"json_object" };
+    const res = await fetch(settings.baseUrl.replace(/\/+$/,"")+"/chat/completions", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+settings.apiKey },
+      body: JSON.stringify(b),
+      signal: abortCtrl ? abortCtrl.signal : undefined
+    });
+    if(!res.ok){
+      let msg = "HTTP "+res.status;
+      try{ const j=await res.json(); msg = (j.error && (j.error.message||j.error.code)) || msg; }catch(e){}
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+    return parseJSON(text);
+  };
+  return run(true).catch(e=>{
+    // 接口不支持 response_format 时去掉后重试一次
+    if(/response_format|json_object|not supported|invalid parameter/i.test(String(e.message))) return run(false);
+    throw e;
+  });
+}
+
+async function callLLM(system, user, temperature){
+  let lastErr = null;
+  for(let i=0;i<3;i++){
+    try{ return await doLLM(system,user,temperature); }
+    catch(e){
+      if(e.name==="AbortError") throw e;
+      if(e instanceof TypeError) throw new Error("网络请求失败：可能是网络不通或接口存在 CORS 限制，可换用支持跨域的 Base URL / 代理。");
+      lastErr = e;
+      await sleep(700*(i+1));
+    }
+  }
+  throw new Error("多次尝试后仍失败："+lastErr.message);
+}
+
+/* ---------- Prompt 构建（三次调用） ---------- */
+function buildSys1(lineup){
+  return `你是「品牌圆桌」的编排引擎。让 4 个品牌 + 1 位主持人围绕产品进行第一轮讨论（主持人开场 + 品牌开场陈述）。
+
+产品 case：${caseText()}
+目标市场：${$("marketSelect").value}
+输出语言：${$("langSelect").value}${buildAttachmentsBlock()}
+
+本场角色与品牌声音卡（每个品牌必须严格遵循自己的 tone 与 personality，文案风格参考 examples）：
+${lineupBlock(lineup)}
+
+第一轮要求：
+1. 主持人先说一句开场引言：一句话引入 case、邀请品牌发言，符合主持人性格；
+2. 随后 4 个品牌依次发言：给出宣传角度（angle）、代表性文案（tagline，1 句），并可给一句口语化发言（content，用于聊天气泡）；
+3. 全场只允许出现以上 5 个角色。
+
+严格输出 JSON 对象（不要 markdown 代码块）：
+{"messages":[{"speaker":"主持人","content":"开场引言"},{"speaker":"品牌名","angle":"宣传角度","tagline":"代表性文案","content":"口语化发言"}]}
+主持人必须是 messages 的第一项。`;
+}
+
+function buildSys2(lineup, transcript1){
+  return `你是「品牌圆桌」的编排引擎。以下是第一轮讨论记录：
+
+${transcript1}
+${buildAttachmentsBlock()}
+
+现在进入第二轮：互相回应。
+
+要求：
+1. 4 个品牌（不含主持人）各回应一次；
+2. 每个品牌必须回应至少一个其他品牌，stance 只能是 agree（赞同）/ disagree（反驳）/ build-on（加码）；
+3. 回应要体现品牌性格差异与交锋（例如活泼品牌调侃严谨品牌、严谨品牌用数据回敬），保持专业与礼貌，不偏离产品营销；
+4. 输出语言：${$("langSelect").value}。
+
+严格输出 JSON 对象：
+{"messages":[{"speaker":"品牌名","target":"被回应品牌","stance":"agree|disagree|build-on","content":"回应内容"}]}`;
+}
+
+function buildSys3(lineup, transcript){
+  return `你是「品牌圆桌」的主持人总结 Agent。你以主持人「${lineup.host}」的身份（${HOST_DESC[lineup.host]}）输出结构化总结。
+
+产品 case：${caseText()}；目标市场：${$("marketSelect").value}；输出语言：${$("langSelect").value}${buildAttachmentsBlock()}
+
+完整两轮讨论记录：
+${transcript}
+
+总结结构：
+1. intro：一句总结引入语；
+2. table：4 个品牌核心观点一句话摘要（每项 {"brand":"品牌名","point":"观点"}）；
+3. consensus：共识（数组，说明品牌间认可的方向）；
+4. divergences：分歧点（数组，每项 {"topic":"分歧主题","meaning":"分歧背后反映的品牌调性差异（教学价值）"}）；
+5. actions：3 条可执行建议（数组，必须引用讨论中的具体观点）；
+
+严格输出 JSON 对象：
+{"intro":"...","table":[{"brand":"...","point":"..."}],"consensus":["..."],"divergences":[{"topic":"...","meaning":"..."}],"actions":["..."]}`;
+}
+
+function buildCardsSys(lineup){
+  return `你是「品牌灵感卡」生成引擎。为每个品牌生成一张营销灵感卡。
+
+产品 case：${caseText()}
+目标市场：${$("marketSelect").value}
+输出语言：${$("langSelect").value}${buildAttachmentsBlock()}
+
+品牌声音卡（严格遵循）：
+${lineupBlock(lineup)}
+
+每张卡包含：
+- headlines：1-3 条按该品牌声音写的 headline/tagline（短、有力）；
+- why：中文解说「为什么这个品牌会这样打」，必须引用该品牌的 tone / personality / voice_summary 字段。
+
+严格输出 JSON 对象：
+{"cards":[{"brand":"品牌名","headlines":["..."],"why":"..."}]}`;
+}
+
+/* ---------- 圆桌编排（3 次 LLM 调用） ---------- */
+async function runRoundtable(forceDemo){
+  if(running) return;
+  running = true; skipAnim = false;
+  abortCtrl = new AbortController();
+  $("btnRoundtable").classList.add("hidden");
+  $("btnCards").classList.add("hidden");
+  $("btnStop").classList.remove("hidden");
+  clearStatus();
+  showStage();
+  const useDemo = forceDemo || settings.forceDemo || !settings.apiKey;
+  try{
+    if(useDemo){ await demoRoundtable(); }
+    else { await llmRoundtable(); }
+    showToast("讨论完成，已保存到历史");
+  }catch(e){
+    if(e.name==="AbortError"){ setStatus("已停止","err"); }
+    else { setStatus("出错了："+e.message,"err"); showToast("出错了："+e.message); }
+  }finally{
+    running = false;
+    $("btnRoundtable").classList.remove("hidden");
+    $("btnCards").classList.remove("hidden");
+    $("btnStop").classList.add("hidden");
+  }
+}
+
+async function llmRoundtable(){
+  const lineup = currentLineup;
+  resetStage();
+  renderCaseHeader(lineup);
+
+  setStatus("第 1 轮：主持人开场 + 品牌陈述…");
+  const r1 = await callLLM(buildSys1(lineup), "开始第一轮。", 0.7);
+  const m1 = Array.isArray(r1) ? r1 : (r1.messages||[]);
+  if(!m1.length) throw new Error("第一轮返回为空");
+  addSectionTitle("主持人开场");
+  await renderHost(m1[0]);
+  addSectionTitle("第一轮 · 开场陈述");
+  for(const m of m1.slice(1)) await renderRound1Bubble(m);
+
+  setStatus("第 2 轮：品牌互相回应…");
+  const r2 = await callLLM(buildSys2(lineup, JSON.stringify(m1)), "开始第二轮。", 0.8);
+  const m2 = Array.isArray(r2) ? r2 : (r2.messages||[]);
+  addSectionTitle("第二轮 · 交锋");
+  for(const m of m2) await renderRound2Bubble(m);
+
+  setStatus("主持人总结中…");
+  const r3 = await callLLM(buildSys3(lineup, JSON.stringify(m1.concat(m2))), "请输出总结。", 0.3);
+  addSectionTitle("主持人总结");
+  renderSummary(r3);
+
+  setStatus("完成","ok");
+  addHistory({ mode:"圆桌", case:caseText(), market:$("marketSelect").value, lang:$("langSelect").value,
+               lineup:{key:lineup.key,label:lineup.label,brands:lineup.brands,host:lineup.host},
+               round1:m1, round2:m2, summary:(r3.summary||r3),
+               attachNames:attachments.map(a=>a.name) });
+}
+
+/* ---------- 演示模式（内置数据，不调用 API） ---------- */
+async function demoRoundtable(){
+  const spec = INDUSTRY_LINEUP[DEMO_DATA.industry];
+  const lineup = { key:DEMO_DATA.industry, label:spec.label, brands:[...spec.brands], host:spec.host };
+  currentLineup = lineup;
+  $("industrySelect").value = lineup.key;
+  $("marketSelect").value = "全球";
+  $("langSelect").value = "中文";
+  renderPreview();
+  resetStage();
+  renderCaseHeader(lineup, DEMO_DATA.case);
+  setStatus("演示模式：主持人开场…");
+  await sleep(400);
+  addSectionTitle("主持人开场");
+  await renderHost(DEMO_DATA.round1[0]);
+  addSectionTitle("第一轮 · 开场陈述");
+  for(const m of DEMO_DATA.round1.slice(1)) await renderRound1Bubble(m);
+  setStatus("演示模式：进入交锋…");
+  await sleep(500);
+  addSectionTitle("第二轮 · 交锋");
+  for(const m of DEMO_DATA.round2) await renderRound2Bubble(m);
+  setStatus("演示模式：主持人总结…");
+  await sleep(500);
+  addSectionTitle("主持人总结");
+  renderSummary(DEMO_DATA.summary);
+  setStatus("演示完成（内置数据，未调用 API）","ok");
+  addHistory({ mode:"圆桌（演示）", case:DEMO_DATA.case, market:"全球", lang:"中文",
+               lineup:{key:lineup.key,label:lineup.label,brands:lineup.brands,host:lineup.host},
+               round1:DEMO_DATA.round1, round2:DEMO_DATA.round2, summary:DEMO_DATA.summary, attachNames:[] });
+}
+
+/* ---------- 灵感卡模式（1 次 LLM 调用） ---------- */
+async function runCards(){
+  if(running) return;
+  running = true; skipAnim = false;
+  abortCtrl = new AbortController();
+  $("btnRoundtable").classList.add("hidden");
+  $("btnCards").classList.add("hidden");
+  $("btnStop").classList.remove("hidden");
+  clearStatus();
+  showStage();
+  const lineup = currentLineup;
+  const useDemo = settings.forceDemo || !settings.apiKey;
+  try{
+    resetStage();
+    renderCaseHeader(lineup);
+    if(useDemo){
+      setStatus("演示模式：展示内置灵感卡…");
+      await sleep(400);
+      await renderCards(DEMO_DATA.cards);
+      setStatus("演示完成（内置数据，未调用 API）","ok");
+      addHistory({ mode:"灵感卡（演示）", case:DEMO_DATA.case, market:"全球", lang:"中文",
+                   lineup:{key:lineup.key,label:lineup.label,brands:lineup.brands,host:lineup.host}, cards:DEMO_DATA.cards, attachNames:[] });
+    }else{
+      setStatus("正在为 4 个品牌生成灵感卡…");
+      const r = await callLLM(buildCardsSys(lineup), "请生成灵感卡。", 0.7);
+      const cards = Array.isArray(r) ? r : (r.cards||[]);
+      if(!cards.length) throw new Error("灵感卡返回为空");
+      await renderCards(cards);
+      setStatus("完成","ok");
+      addHistory({ mode:"灵感卡", case:caseText(), market:$("marketSelect").value, lang:$("langSelect").value,
+                   lineup:{key:lineup.key,label:lineup.label,brands:lineup.brands,host:lineup.host}, cards,
+                   attachNames:attachments.map(a=>a.name) });
+    }
+    showToast("已完成，已保存到历史");
+  }catch(e){
+    if(e.name==="AbortError"){ setStatus("已停止","err"); }
+    else { setStatus("出错了："+e.message,"err"); showToast("出错了："+e.message); }
+  }finally{
+    running = false;
+    $("btnRoundtable").classList.remove("hidden");
+    $("btnCards").classList.remove("hidden");
+    $("btnStop").classList.add("hidden");
+  }
+}
+
+/* ---------- 设置面板 ---------- */
+function openSettings(){
+  const s = loadSettings();
+  const overlay = el("div","overlay");
+  overlay.innerHTML = `<div class="modal">
+    <h3>⚙ 设置</h3>
+    <label>API Base URL</label>
+    <input id="setBase" class="inp" value="${escapeHtml(s.baseUrl)}" placeholder="https://api.openai.com/v1">
+    <label>API Key（仅保存在本机浏览器 localStorage，不上传）</label>
+    <input id="setKey" type="password" class="inp" value="${escapeHtml(s.apiKey)}" placeholder="sk-...">
+    <label>模型名</label>
+    <input id="setModel" class="inp" value="${escapeHtml(s.model)}" placeholder="gpt-4o-mini">
+    <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin-top:14px">
+      <input id="setForceDemo" type="checkbox" ${s.forceDemo?"checked":""}> 始终使用演示模式（不调用 API）
+    </label>
+    <div class="hint-bar">提示：Key 只存在本机 localStorage。若接口有 CORS 限制，可将 Base URL 换成支持跨域的代理地址。</div>
+    <div class="row"><button id="setCancel" class="btn">取消</button><button id="setSave" class="btn primary">保存</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector("#setCancel").onclick = ()=>overlay.remove();
+  overlay.querySelector("#setSave").onclick = ()=>{
+    const next = { baseUrl:overlay.querySelector("#setBase").value.trim()||defaultSettings().baseUrl,
+                   apiKey:overlay.querySelector("#setKey").value.trim(),
+                   model:overlay.querySelector("#setModel").value.trim()||defaultSettings().model,
+                   forceDemo:overlay.querySelector("#setForceDemo").checked };
+    saveSettings(next);
+    settings = loadSettings();
+    overlay.remove();
+    showToast("设置已保存");
+    $("keyHint").classList.toggle("hidden", !!(settings.apiKey||settings.forceDemo));
+  };
+}
+
+/* 回看历史：瞬时渲染（不做打字机动画） */
+function viewHistory(idx){
+  const h = loadHistory()[idx];
+  if(!h) return;
+  resetStage();
+  showStage();
+  renderHistorySidebar(idx);
+  const lineup = h.lineup || { key:"Consumer", label:"消费品", brands:[], host:"" };
+  renderCaseHeader(lineup, h.case);
+  if((h.cards||[]).length){ renderCards(h.cards); return; }
+  if(h.round1 && h.round1.length){
+    addSectionTitle("主持人开场");
+    renderHost(h.round1[0], true);
+    addSectionTitle("第一轮 · 开场陈述");
+    h.round1.slice(1).forEach(m=>renderRound1Bubble(m, true));
+    if((h.round2||[]).length){
+      addSectionTitle("第二轮 · 交锋");
+      h.round2.forEach(m=>renderRound2Bubble(m, true));
+    }
+  }
+  if(h.summary){
+    addSectionTitle("主持人总结");
+    renderSummary(h.summary);
+  }
+  $("stage").scrollIntoView({behavior:"smooth"});
+}
+
+
+/* ---------- 页面视图切换（首页 / 对话） ---------- */
+function showStage(){ $("homeView").classList.add("hidden"); $("pickView").classList.add("hidden"); $("stageView").classList.remove("hidden"); }
+function showHome(){ $("stageView").classList.add("hidden"); $("pickView").classList.add("hidden"); $("homeView").classList.remove("hidden"); resetStage(); }
+function showPick(){
+  if(!currentLineup) refreshPreview();
+  const lineup = buildPickedLineup();
+  currentLineup = lineup;
+  $("homeView").classList.add("hidden");
+  $("stageView").classList.add("hidden");
+  $("pickView").classList.remove("hidden");
+  const box = $("pickLineup"); box.innerHTML = "";
+  lineup.brands.forEach(b=>{ box.appendChild(el("span","chip",`<span class="dot" style="background:${brandColor(b)}"></span>${escapeHtml(b)}`)); });
+  const hb = $("pickHost"); hb.innerHTML = "";
+  hb.appendChild(el("span","chip host",`<span class="dot" style="background:${brandColor(lineup.host)}"></span>${escapeHtml(lineup.host)}<span class="host-tag">主持人</span>`));
+  $("pickInput").value = $("productInput").value.trim() || "";
+  $("pickMarket").value = $("marketSelect").value;
+  $("pickKeyHint").classList.toggle("hidden", !!(settings.apiKey||settings.forceDemo));
+}
+
+/* ---------- 暗色模式 ---------- */
+const THEME_KEY = "brandRoundtableTheme";
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
+  $("darkToggle").textContent = theme === "dark" ? "☀️" : "🌙";
+}
+function initTheme(){ applyTheme(localStorage.getItem(THEME_KEY) || "light"); }
+
+/* ---------- 更多菜单 / 使用说明 ---------- */
+function openUsage(){
+  const overlay = el("div","overlay");
+  overlay.innerHTML = `<div class="modal"><h3>📖 使用说明</h3>
+    <p>1. 在「自动圆桌」输入产品话题，点击「开始 →」，4 个品牌 + 1 位主持人会围绕它展开讨论。<br>
+    2. 没有 API Key 时自动使用内置演示数据；点击左下角「⚙️ 设置」填入 Key 与模型名后可调用真实模型。<br>
+    3. 在「与品牌对话」搜索或点击品牌，可把它加入阵容；输入任意名字后回车可创建自定义角色。<br>
+    4. 「推荐圆桌」点击任意卡片可直接开始一场讨论。<br>
+    5. 点击左侧对话历史可回看之前的结果。</p>
+    <div class="row"><button id="uClose" class="btn">知道了</button></div></div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector("#uClose").onclick = ()=>overlay.remove();
+}
+
+/* ---------- 左侧导航：对话历史（emoji + 日期标签） ---------- */
+const HISTORY_EMOJI = ["🎯","💡","🚀","🧩","🎲","🌶️","🍵","📦","✨","⚡"];
+function dateLabel(ts){
+  const t = new Date(ts), now = new Date();
+  const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const d1 = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const diff = Math.round((d0 - d1) / 86400000);
+  if(diff === 0) return "今天";
+  if(diff === 1) return "昨天";
+  return `${t.getMonth()+1}/${t.getDate()}`;
+}
+let historyMenu = null;
+function closeHistoryMenu(){ if(historyMenu){ historyMenu.remove(); historyMenu = null; } }
+function openHistoryMenu(e, h, idx, inFolder){
+  e = e || {};
+  if(e.stopPropagation) e.stopPropagation();
+  closeHistoryMenu();
+  const id = idOf(h);
+  const pinned = loadPinned();
+  const actions = [
+    { act:"folder", label: inFolder ? "📂 移出文件夹" : "📁 创建文件夹", fn:()=>folderAction(h, inFolder) },
+    { act:"pin", label: pinned.includes(id) ? "📌 取消置顶" : "📌 置顶", fn:()=>pinAction(h) },
+    { act:"del", label:"🗑 删除", danger:true, fn:()=>delAction(idx) }
+  ];
+  const menu = el("div","menu pop");
+  menu.innerHTML = actions.map(a=>`<div class="menu-item${a.danger?" danger":""}" data-act="${a.act}">${a.label}</div>`).join("");
+  menu.style.left = (e.clientX||10)+"px";
+  menu.style.top = (e.clientY||10)+"px";
+  menu.querySelectorAll(".menu-item").forEach((n,i)=>{ n.onclick = (ev)=>{ ev = ev||{}; if(ev.stopPropagation) ev.stopPropagation(); closeHistoryMenu(); actions[i].fn(); }; });
+  document.body.appendChild(menu);
+  historyMenu = menu;
+}
+function pinAction(h){
+  const id = idOf(h);
+  const pinned = loadPinned();
+  const on = pinned.includes(id);
+  if(on) pinned.splice(pinned.indexOf(id),1); else pinned.push(id);
+  savePinned(pinned);
+  renderHistorySidebar();
+  showToast(on ? "已取消置顶" : "已置顶到顶部");
+}
+function delAction(idx){
+  const list = loadHistory();
+  const h = list[idx]; if(!h) return;
+  const id = idOf(h);
+  list.splice(idx,1);
+  saveHistoryList(list);
+  savePinned(loadPinned().filter(x=>x!==id));
+  saveFolders(loadFolders().map(f=>({name:f.name, items:f.items.filter(x=>x!==id)})).filter(f=>f.items.length>0));
+  renderHistorySidebar();
+  showToast("对话已删除");
+}
+function folderAction(h, inFolder){
+  const id = idOf(h);
+  if(inFolder){
+    saveFolders(loadFolders().map(f=>({name:f.name, items:f.items.filter(x=>x!==id)})).filter(f=>f.items.length>0));
+    renderHistorySidebar();
+    showToast("已移出文件夹");
+    return;
+  }
+  const overlay = el("div","overlay");
+  overlay.innerHTML = `<div class="modal">
+    <h3>📁 创建文件夹</h3>
+    <label>文件夹名称</label>
+    <input id="folderName" class="inp" placeholder="例如：面试案例">
+    <div class="row"><button id="folderCancel" class="btn">取消</button><button id="folderSave" class="btn primary">创建并移入</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector("#folderCancel").onclick = ()=>overlay.remove();
+  overlay.querySelector("#folderSave").onclick = ()=>{
+    const name = overlay.querySelector("#folderName").value.trim();
+    if(!name){ showToast("请输入文件夹名称"); return; }
+    const folders = loadFolders();
+    let f = folders.find(x=>x.name===name);
+    if(!f){ f = {name, items:[]}; folders.push(f); }
+    if(!f.items.includes(id)) f.items.push(id);
+    saveFolders(folders);
+    overlay.remove();
+    renderHistorySidebar();
+    showToast(`已把对话移入「${name}」`);
+  };
+  overlay.querySelector("#folderName").focus();
+}
+function renderHistorySidebar(activeIdx){
+  const list = loadHistory();
+  const q = ($("navSearch").value || "").trim().toLowerCase();
+  const box = $("historyList");
+  box.innerHTML = "";
+  if(!list.length){ box.appendChild(el("div","h-empty","暂无对话历史\n完成一场圆桌或灵感卡后会出现在这里")); return; }
+  const pinned = loadPinned();
+  const folders = loadFolders();
+  const folderOf = new Map();
+  folders.forEach(f=>f.items.forEach(id=>{ if(!folderOf.has(id)) folderOf.set(id, f.name); }));
+  const pinnedSet = new Set(pinned);
+  const match = h => !q || String(h.case||"").toLowerCase().includes(q);
+  let shown = 0;
+  const appendItem = (h, i, inFolder)=>{
+    if(!match(h)) return;
+    shown++;
+    const emoji = (h.mode||"").includes("灵感") ? "💡" : HISTORY_EMOJI[i % HISTORY_EMOJI.length];
+    const pinMark = pinnedSet.has(idOf(h)) ? `<span class="h-pin">📌</span>` : "";
+    const item = el("div","h-item"+(i===activeIdx?" active":"")+(inFolder?" in-folder":""),
+      `<div class="h-emoji">${emoji}</div>${pinMark}<div class="h-title">${escapeHtml(h.case)}</div><div class="h-date">${dateLabel(h.ts||Date.now())}</div><button class="h-more" title="更多操作">⋯</button>`);
+    item.onclick = ()=>{ closeHistoryMenu(); viewHistory(i); };
+    item.querySelector(".h-more").onclick = (e)=>openHistoryMenu(e, h, i, inFolder);
+    box.appendChild(item);
+  };
+  list.forEach((h,i)=>{ if(pinnedSet.has(idOf(h))) appendItem(h, i); });
+  folders.forEach(f=>{
+    const its = list.filter(h=>folderOf.get(idOf(h))===f.name && !pinnedSet.has(idOf(h)));
+    const vis = its.filter(match);
+    if(!vis.length) return;
+    box.appendChild(el("div","h-folder",`📁 <span class="h-title">${escapeHtml(f.name)}</span><span class="f-count">${vis.length}</span>`));
+    its.forEach(h=>appendItem(h, list.indexOf(h), true));
+  });
+  list.forEach((h,i)=>{ if(!pinnedSet.has(idOf(h)) && !folderOf.has(idOf(h))) appendItem(h, i); });
+  if(!shown) box.appendChild(el("div","h-empty","没有匹配的对话"));
+}
+
+/* ---------- 与品牌对话：标签筛选 + 角色卡片网格 ---------- */
+const BRAND_TAG = { Fintech:"金融科技", AI:"AI", "Dev Tools":"开发工具", Gaming:"游戏", SaaS:"SaaS", Consumer:"消费品", B2B:"B2B", General:"通用" };
+const BRAND_TAGS = ["全部","消费品","SaaS","开发工具","金融科技","游戏","AI","B2B"];
+const FAV_KEY = "brandRoundtableFavs";
+const CUSTOM_KEY = "brandRoundtableCustoms";
+let brandQ = "", brandTag = "全部";
+let picked = [];          // 用户勾选的品牌（最多 4 位），用于「开始圆桌」
+
+function loadFavs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); }catch(e){ return []; } }
+function saveFavs(f){ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }
+function loadCustoms(){ try{ return JSON.parse(localStorage.getItem(CUSTOM_KEY)||"[]"); }catch(e){ return []; } }
+function saveCustoms(c){ localStorage.setItem(CUSTOM_KEY, JSON.stringify(c)); }
+function customColor(name){
+  let h = 0;
+  for(const ch of name) h = (h*31 + ch.codePointAt(0)) % 360;
+  return `hsl(${h},55%,50%)`;
+}
+
+function renderBrandTags(){
+  const box = $("brandTags"); box.innerHTML = "";
+  BRAND_TAGS.forEach(t=>{
+    const tag = el("button","tag"+(t===brandTag?" active":""), t);
+    tag.onclick = ()=>{ brandTag = t; renderBrandTags(); renderBrandGrid(); };
+    box.appendChild(tag);
+  });
+}
+
+function renderBrandGrid(){
+  const grid = $("brandGrid"); grid.innerHTML = "";
+  const q = brandQ.trim().toLowerCase();
+  const favs = loadFavs();
+  const items = [];
+  BRAND_VOICES.forEach(v=>{
+    const tag = BRAND_TAG[v.category] || "其他";
+    if(brandTag !== "全部" && tag !== brandTag) return;
+    if(q && !v.brand.toLowerCase().includes(q)) return;
+    items.push({ name:v.brand, tag, color:brandColor(v.brand) });
+  });
+  loadCustoms().forEach(c=>{
+    const ctag = c.industry || "自定义";
+    if(brandTag !== "全部" && ctag !== brandTag) return;
+    if(q && !c.name.toLowerCase().includes(q)) return;
+    items.push({ name:c.name, tag:ctag, color:customColor(c.name), custom:true });
+  });
+  items.sort((a,b)=> (favs.includes(b.name)?1:0) - (favs.includes(a.name)?1:0));
+  if(!items.length) grid.appendChild(el("div","h-empty","没有匹配的品牌，回车可创建自定义角色"));
+  items.forEach(it=>{
+    const isFav = favs.includes(it.name);
+    const isPicked = picked.includes(it.name);
+    const card = el("div","brand-card"+(isPicked?" selected":""));
+    const actions = it.custom ? `<div class="bc-actions"><button class="bc-edit">✏️ 编辑</button><button class="bc-del">🗑 删除</button></div>` : "";
+    card.innerHTML = `<div class="bc-top"><div class="bc-logo" style="background:${it.color}">${escapeHtml(it.name.charAt(0))}</div>
+      <button class="bc-star${isFav?" fav":""}" title="收藏">${isFav?"★":"☆"}</button>
+      <button class="bc-add${isPicked?" on":""}" title="${isPicked?"已选，点击取消":"选择加入本轮"}">${isPicked?"✓":"＋"}</button></div>
+      <div class="bc-name">${escapeHtml(it.name)}</div>
+      <span class="bc-cat">${escapeHtml(it.tag)}</span>
+      ${actions}
+      <button class="bc-btn">开始对话</button>`;
+    card.querySelector(".bc-star").onclick = ()=>toggleFav(it.name);
+    card.querySelector(".bc-add").onclick = ()=>togglePick(it.name);
+    card.querySelector(".bc-btn").onclick = ()=>addBrandToLineup(it.name);
+    if(it.custom){
+      card.querySelector(".bc-edit").onclick = ()=>openRoleModal({name:it.name});
+      card.querySelector(".bc-del").onclick = ()=>{ const cs = loadCustoms().filter(c=>c.name!==it.name); saveCustoms(cs); renderBrandGrid(); showToast(`已删除角色「${it.name}」`); };
+    }
+    grid.appendChild(card);
+  });
+}
+
+function toggleFav(name){
+  const favs = loadFavs();
+  const i = favs.indexOf(name);
+  if(i >= 0) favs.splice(i,1); else favs.push(name);
+  saveFavs(favs);
+  renderBrandGrid();
+  showToast(i >= 0 ? `已取消收藏 ${name}` : `已收藏 ${name}`);
+}
+
+function togglePick(name){
+  const i = picked.indexOf(name);
+  if(i >= 0) picked.splice(i,1);
+  else {
+    if(picked.length >= 4){ showToast("最多选择 4 个品牌"); return; }
+    picked.push(name);
+  }
+  renderBrandGrid();
+  renderPickBar();
+}
+function renderPickBar(){
+  const bar = $("pickBar"); if(!bar) return;
+  bar.classList.toggle("hidden", picked.length===0);
+  $("pickCount").textContent = String(picked.length);
+  const box = $("pickChips"); box.innerHTML = "";
+  picked.forEach(n=>{
+    const chip = el("span","chip",`<span class="dot" style="background:${brandColor(n)}"></span>${escapeHtml(n)}<span class="chip-x">×</span>`);
+    chip.onclick = ()=>togglePick(n);
+    box.appendChild(chip);
+  });
+}
+function buildPickedLineup(){
+  if(!currentLineup) refreshPreview();
+  const spec = INDUSTRY_LINEUP[currentLineup.key];
+  const host = spec ? spec.host : currentLineup.host;
+  const guests = picked.filter(b=>b!==host).slice(0,4);
+  const rest = [];
+  (currentLineup.brands||[]).forEach(b=>{ if(!guests.includes(b) && b!==host && !rest.includes(b)) rest.push(b); });
+  BRAND_VOICES.forEach(v=>{ if(!guests.includes(v.brand) && v.brand!==host && !rest.includes(v.brand)) rest.push(v.brand); });
+  loadCustoms().forEach(c=>{ if(!guests.includes(c.name) && c.name!==host && !rest.includes(c.name)) rest.push(c.name); });
+  let need = 4 - guests.length;
+  const fill = [];
+  for(const b of rest){ if(need<=0) break; fill.push(b); need--; }
+  return { key:currentLineup.key, label:currentLineup.label, brands:guests.concat(fill), host };
+}
+function startPickedRoundtable(){
+  if(!picked.length){ showToast("请先在品牌卡片上选择品牌"); return; }
+  showPick();
+}
+
+function openRoleModal(opts){
+  opts = opts || {};
+  const customs = loadCustoms();
+  const existing = opts.name ? customs.find(c=>c.name===opts.name) : null;
+  const editing = !!existing;
+  const industryList = ["消费品","SaaS","开发工具","金融科技","游戏","AI","B2B","通用"].map(o=>`<option value="${o}">`).join("");
+  const curIndustry = editing ? (existing.industry||"") : "";
+  const overlay = el("div","overlay");
+  overlay.innerHTML = `<div class="modal">
+    <h3>${editing?"✏️ 编辑角色":"➕ 创建角色"}</h3>
+    <label>品牌名字</label>
+    <input id="roleName" class="inp" value="${escapeHtml(existing?existing.name:opts.name||"")}" placeholder="例如：蜜雪冰城"${editing?" readonly":""}>
+    <label>行业（可直接输入自定义行业，留空为「自定义」）</label>
+    <input id="roleIndustry" class="inp" list="industryList" value="${escapeHtml(curIndustry)}" placeholder="选择或输入，例如：消费品 / 教育 / 本地生活">
+    <datalist id="industryList">${industryList}</datalist>
+    <label>系统提示词（描述品牌说话风格、立场、口头禅）</label>
+    <textarea id="rolePrompt" class="inp" rows="4" placeholder="例如：热情亲切，爱用叠词，强调快乐与性价比，从不谈严肃话题">${escapeHtml(existing?(existing.systemPrompt||""):"")}</textarea>
+    <div class="row"><button id="roleCancel" class="btn">取消</button><button id="roleSave" class="btn primary">${editing?"保存修改":"创建角色"}</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector("#roleCancel").onclick = ()=>overlay.remove();
+  overlay.querySelector("#roleSave").onclick = ()=>{
+    const name = overlay.querySelector("#roleName").value.trim();
+    const industry = overlay.querySelector("#roleIndustry").value;
+    const systemPrompt = overlay.querySelector("#rolePrompt").value.trim();
+    if(!name){ showToast("请填写品牌名字"); return; }
+    if(editing){ existing.name = name; existing.industry = industry; existing.systemPrompt = systemPrompt; }
+    else {
+      if(customs.some(c=>c.name===name)){ showToast("该角色已存在"); return; }
+      customs.push({name, industry, systemPrompt});
+    }
+    saveCustoms(customs);
+    overlay.remove();
+    renderBrandGrid();
+    showToast(editing ? `已更新角色「${name}」` : `已创建角色「${name}」`);
+    if(opts.afterSave) opts.afterSave(name);
+  };
+  overlay.querySelector("#roleName").focus();
+}
+function createRole(){ openRoleModal({}); }
+
+/* 把品牌放入当前阵容（替换第 4 位）；未知名字作为自定义品牌 */
+function addBrandToLineup(name){
+  if(!currentLineup) refreshPreview();
+  const n = name.trim();
+  if(!n) return;
+  if(currentLineup.brands.includes(n) || currentLineup.host===n){ showToast(`「${n}」已在阵容中`); return; }
+  currentLineup.brands[currentLineup.brands.length-1] = n;
+  renderPreview();
+  showToast(`已把「${n}」放入阵容`);
+  $("inputPanel") && $("inputPanel").scrollIntoView({behavior:"smooth"});
+}
+
+/* ---------- 推荐圆桌（6 个预设 case） ---------- */
+const RECOMMENDED = [
+  { emoji:"🍹", title:"便携榨汁杯", desc:"3 秒出汁的通勤健康神器，怎么让年轻人天天带着它出门？", case:"便携榨汁杯：3 秒出汁、可拆卸清洗、USB 充电、随身携带，主打通勤与轻健康生活", industry:"Consumer" },
+  { emoji:"⌚", title:"智能手环", desc:"把健康数据变成看得见的日常习惯，而不是另一个吃灰设备。", case:"智能手环：心率/睡眠/运动追踪，续航 14 天，主打健康习惯养成", industry:"Consumer" },
+  { emoji:"🧰", title:"团队协作工具", desc:"把碎片化沟通收进一个工作台，让跨部门协作不再刷屏。", case:"团队协作工具：任务看板 + 文档 + 会议一体化，主打减少工具切换", industry:"SaaS" },
+  { emoji:"🧪", title:"开发者测试平台", desc:"让每次版本上线前都更稳，开发者愿意主动写测试。", case:"开发者测试平台：自动生成测试用例、CI 集成、覆盖率看板，面向开发团队", industry:"DevTools" },
+  { emoji:"💳", title:"数字钱包", desc:"年轻人的第一张全球卡：实时汇率、无手续费、费率透明。", case:"数字钱包：多币种账户、实时汇率、无隐藏手续费，主打全球自由消费", industry:"Fintech" },
+  { emoji:"🤖", title:"AI 写作助手", desc:"写得快，也写得像你：一键调风格、查事实、改语气。", case:"AI 写作助手：长文写作、风格模仿、事实核查，面向内容创作者", industry:"AI" }
+];
+function renderRecommended(){
+  const grid = $("recGrid"); grid.innerHTML = "";
+  RECOMMENDED.forEach(r=>{
+    const card = el("div","rec-card");
+    card.innerHTML = `<div class="rec-emoji">${r.emoji}</div><div class="rec-title">${escapeHtml(r.title)}</div><div class="rec-desc">${escapeHtml(r.desc)}</div>`;
+    card.onclick = ()=>{
+      $("industrySelect").value = r.industry;
+      refreshPreview();
+      $("productInput").value = r.case;
+      runRoundtable(false);
+    };
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- 初始化 ---------- */
+function init(){
+  initTheme();
+  $("darkToggle").onclick = ()=>{ const cur = document.documentElement.getAttribute("data-theme")==="dark" ? "light" : "dark"; applyTheme(cur); };
+  $("moreBtn").onclick = e=>{ e.stopPropagation(); $("moreMenu").classList.toggle("hidden"); };
+  document.addEventListener("click", e=>{
+    if(typeof e.target.closest === "function" && e.target.closest("#moreWrap")) return;
+    $("moreMenu").classList.add("hidden");
+  });
+  document.addEventListener("click", ()=>{ closeHistoryMenu(); });
+  $("moreMenu").querySelectorAll(".menu-item").forEach(n=>n.onclick = ()=>{
+    if(n.dataset.act === "clear"){ saveHistoryList([]); savePinned([]); saveFolders([]); renderHistorySidebar(); showToast("历史已清空"); }
+    if(n.dataset.act === "usage") openUsage();
+  });
+  $("supportBtn").onclick = openUsage;
+  $("langSelect").value = "中文";
+
+  $("btnNewChat").onclick = showHome;
+  $("navSearch").addEventListener("input", ()=>renderHistorySidebar());
+  $("btnSettings").onclick = openSettings;
+
+  const sel = $("industrySelect");
+  sel.innerHTML = Object.keys(INDUSTRY_LINEUP).map(k=>`<option value="${k}">${escapeHtml(INDUSTRY_LINEUP[k].label)}</option>`).join("");
+  sel.value = "Consumer";
+  sel.onchange = refreshPreview;
+  $("btnShuffle").onclick = shuffleLineup;
+  $("btnRoundtable").onclick = ()=>runRoundtable(false);
+  $("btnCards").onclick = runCards;
+  $("btnStop").onclick = ()=>{ if(abortCtrl) abortCtrl.abort(); skipAnim = true; };
+  $("btnBackHome").onclick = showHome;
+  $("fileInput").addEventListener("change", e=>{ handleFiles(e.target.files); e.target.value = ""; });
+
+  $("brandSearch").addEventListener("input", e=>{ brandQ = e.target.value; renderBrandGrid(); });
+  $("brandSearch").addEventListener("keydown", e=>{
+    if(e.key !== "Enter") return;
+    const val = e.target.value.trim();
+    if(!val) return;
+    const known = BRAND_VOICES.find(b=>b.brand.toLowerCase()===val.toLowerCase());
+    if(known){ addBrandToLineup(known.brand); }
+    else {
+      const customs = loadCustoms();
+      if(customs.some(c=>c.name===val)){ addBrandToLineup(val); }
+      else openRoleModal({ name:val, afterSave:()=>addBrandToLineup(val) });
+    }
+    e.target.value = "";
+    brandQ = "";
+    renderBrandGrid();
+  });
+  $("createRoleBtn").onclick = createRole;
+  $("pickClear").onclick = ()=>{ picked = []; renderPickBar(); renderBrandGrid(); };
+  $("pickStart").onclick = startPickedRoundtable;
+  $("btnPickBack").onclick = showHome;
+  $("btnPickStart").onclick = ()=>{
+    const t = $("pickInput").value.trim();
+    if(!t){ showToast("请先输入话题"); return; }
+    $("productInput").value = t;
+    $("marketSelect").value = $("pickMarket").value;
+    const n = picked.length;
+    picked = [];
+    renderPickBar();
+    renderBrandGrid();
+    showToast(n ? `已按你选的 ${n} 个品牌开始讨论` : "开始讨论");
+    runRoundtable(false);
+  };
+  renderPickBar();
+  $("stage").addEventListener("click", ()=>{ skipAnim = true; });
+
+  refreshPreview();
+  renderRecommended();
+  renderBrandTags();
+  renderBrandGrid();
+  renderHistorySidebar();
+  $("keyHint").classList.toggle("hidden", !!(settings.apiKey||settings.forceDemo));
+}
+document.addEventListener("DOMContentLoaded", init);
+
+</script>
+</body>
+</html>
